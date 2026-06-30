@@ -1,0 +1,41 @@
+{
+    "name": "Coffeeshotit Media - Professional Photography & Videography Services",
+    "short_name": "Coffeeshotit",
+    "description": "Professional photography and videography services in Nigeria. Specializing in weddings, events, studio portraits, and corporate photography.",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#000000",
+    "theme_color": "#000000",
+    "orientation": "portrait-primary",
+    "scope": "/",
+    "lang": "en",
+    "categories": ["photography", "business", "lifestyle"],
+    "icons": [
+        {
+            "src": "https://images.prismic.io/coffeeshotit/aHEac0MqNJQqHzKY_CoffeeLogo-nobg.png?auto=format,compress&w=192&h=192",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "https://images.prismic.io/coffeeshotit/aHEac0MqNJQqHzKY_CoffeeLogo-nobg.png?auto=format,compress&w=512&h=512",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "https://images.prismic.io/coffeeshotit/aFS4vnfc4bHWijt6_Coffee.jpg?auto=format,compress&w=1280&h=720",
+            "sizes": "1280x720",
+            "type": "image/jpeg",
+            "form_factor": "wide"
+        },
+        {
+            "src": "https://images.prismic.io/coffeeshotit/aFS4vnfc4bHWijt6_Coffee.jpg?auto=format,compress&w=750&h=1334",
+            "sizes": "750x1334",
+            "type": "image/jpeg",
+            "form_factor": "narrow"
+        }
+    ]
+}

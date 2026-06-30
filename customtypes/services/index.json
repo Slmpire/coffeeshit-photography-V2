@@ -1,0 +1,48 @@
+{
+  "format": "custom",
+  "id": "services",
+  "label": "Services",
+  "repeatable": true,
+  "status": true,
+  "json": {
+    "Main": {
+      "uid": {
+        "type": "UID",
+        "config": {
+          "label": "UID"
+        }
+      },
+      "title": {
+        "type": "Text",
+        "config": {
+          "label": "Title",
+          "placeholder": ""
+        }
+      },
+      "subtitle": {
+        "type": "Text",
+        "config": {
+          "label": "Subtitle",
+          "placeholder": ""
+        }
+      },
+      "feature_image": {
+        "type": "Image",
+        "config": {
+          "label": "Feature Image",
+          "constraint": {},
+          "thumbnails": []
+        }
+      },
+      "description": {
+        "type": "StructuredText",
+        "config": {
+          "label": "Description",
+          "placeholder": "",
+          "allowTargetBlank": false,
+          "single": "paragraph"
+        }
+      }
+    }
+  }
+}

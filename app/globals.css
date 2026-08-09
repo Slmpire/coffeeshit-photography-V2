@@ -3,6 +3,29 @@
 @tailwind utilities;
 
 @layer base {
+    :root {
+        --background: 0 0% 0%;
+        --foreground: 0 0% 98%;
+        --card: 0 0% 4%;
+        --card-foreground: 0 0% 98%;
+        --popover: 0 0% 4%;
+        --popover-foreground: 0 0% 98%;
+        --primary: 38 92% 50%;
+        --primary-foreground: 0 0% 0%;
+        --secondary: 0 0% 10%;
+        --secondary-foreground: 0 0% 98%;
+        --muted: 0 0% 15%;
+        --muted-foreground: 0 0% 64%;
+        --accent: 38 92% 50%;
+        --accent-foreground: 0 0% 0%;
+        --destructive: 0 84% 60%;
+        --destructive-foreground: 0 0% 98%;
+        --border: 0 0% 15%;
+        --input: 0 0% 15%;
+        --ring: 38 92% 50%;
+        --radius: 0.5rem;
+    }
+
     * {
         @apply border-border;
     }
@@ -11,57 +34,31 @@
         @apply bg-background text-foreground;
     }
 
-    /* Hide default cursor on desktop only */
-    @media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
-        body {
-            /* cursor: none !important; */
-        }
-
-        /* Ensure custom cursor is visible */
-        .custom-cursor {
-            display: block !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-        }
-    }
-
-    /* Enhanced Smooth scrolling */
     html {
         scroll-behavior: smooth;
-        scroll-padding-top: 2rem;
+        scroll-padding-top: 5rem;
     }
 
-    /* For browsers that don't support scroll-behavior: smooth */
-    @media (prefers-reduced-motion: no-preference) {
-        html {
-            scroll-behavior: smooth;
-        }
-    }
-
-    /* Custom scrollbar with brown theme */
     ::-webkit-scrollbar {
-        width: 8px;
+        width: 6px;
     }
 
     ::-webkit-scrollbar-track {
         background: rgba(0, 0, 0, 0.1);
-        border-radius: 4px;
     }
 
     ::-webkit-scrollbar-thumb {
-        background: rgba(139, 69, 19, 0.6);
+        background: rgba(245, 158, 11, 0.5);
         border-radius: 4px;
-        transition: background 0.3s ease;
     }
 
     ::-webkit-scrollbar-thumb:hover {
-        background: rgba(139, 69, 19, 0.8);
+        background: rgba(245, 158, 11, 0.8);
     }
 
-    /* Firefox scrollbar */
     * {
         scrollbar-width: thin;
-        scrollbar-color: rgba(139, 69, 19, 0.6) rgba(0, 0, 0, 0.1);
+        scrollbar-color: rgba(245, 158, 11, 0.5) rgba(0, 0, 0, 0.1);
     }
 }
 
@@ -71,68 +68,27 @@
     }
 
     .glass-effect {
-        @apply bg-white/10 backdrop-blur-sm border border-white/20;
-    }
-
-    .hover-glow {
-        transition: all 0.3s ease;
+        @apply bg-white/5 backdrop-blur-md border border-white/10;
     }
 
     .hover-glow:hover {
-        box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
-    }
-
-    /* Smooth scroll utilities */
-    .scroll-smooth {
-        scroll-behavior: smooth;
-    }
-
-    .scroll-smooth-slow {
-        scroll-behavior: smooth;
-        scroll-timeline: smooth;
-    }
-
-    /* Mobile responsive text sizes */
-    .responsive-text-xl {
-        @apply text-lg;
-    }
-
-    @media (min-width: 768px) {
-        .responsive-text-xl {
-            @apply text-xl;
-        }
-    }
-
-    .responsive-text-6xl {
-        @apply text-4xl;
-    }
-
-    @media (min-width: 768px) {
-        .responsive-text-6xl {
-            @apply text-6xl;
-        }
+        box-shadow: 0 0 30px rgba(245, 158, 11, 0.15);
     }
 }
 
-/* Animation keyframes */
 @keyframes float {
-    0%,
-    100% {
-        transform: translateY(0px);
-    }
-    50% {
-        transform: translateY(-10px);
-    }
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
 }
 
 @keyframes glow {
-    0%,
-    100% {
-        opacity: 0.5;
-    }
-    50% {
-        opacity: 1;
-    }
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
 }
 
 .animate-float {
@@ -143,14 +99,11 @@
     animation: glow 2s ease-in-out infinite;
 }
 
-/* Typography enhancements */
 .signature-font {
     font-family: var(--font-dancing-script), cursive;
     font-weight: 700;
-    letter-spacing: -0.02em;
 }
 
-/* Cinematic effects */
 .cinematic-blur {
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
@@ -159,12 +112,10 @@
 .premium-shadow {
     box-shadow:
         0 0 0 1px rgba(255, 255, 255, 0.05),
-        0 2px 4px rgba(0, 0, 0, 0.1),
-        0 8px 16px rgba(0, 0, 0, 0.1),
-        0 16px 32px rgba(0, 0, 0, 0.1);
+        0 4px 6px rgba(0, 0, 0, 0.3),
+        0 16px 32px rgba(0, 0, 0, 0.4);
 }
 
-/* Mobile optimizations */
 @media (max-width: 1023px) {
     .signature-font {
         font-size: clamp(2rem, 8vw, 4rem);

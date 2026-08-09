@@ -10,7 +10,9 @@
         "slicemachine": "start-slicemachine"
     },
     "dependencies": {
+        "@calcom/embed-react": "^1.5.3",
         "@emotion/is-prop-valid": "latest",
+        "@google/generative-ai": "^0.24.1",
         "@hookform/resolvers": "^5.2.2",
         "@prismicio/client": "^7.21.3",
         "@prismicio/next": "^2.0.2",
@@ -61,9 +63,11 @@
         "react-dom": "^19.2.3",
         "react-email": "^5.1.1",
         "react-hook-form": "latest",
+        "react-intersection-observer": "^11.0.0",
         "react-resizable-panels": "latest",
         "recharts": "latest",
         "shadcn": "latest",
+        "sharp": "^0.35.3",
         "sonner": "^2.0.7",
         "tailwind-merge": "^3.4.0",
         "tailwindcss-animate": "^1.0.7",

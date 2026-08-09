@@ -12,7 +12,6 @@ import {
     StoryTellerDocument,
     HomepageImageCollageDocument,
 } from "@/prismicio-types";
-import MoreAbout from "@/components/more-about";
 import FeaturedPhoto from "@/components/featured-photo";
 import GalleryGrid from "@/components/gallery-grid";
 import ContactCTA from "@/components/contact-cta";
@@ -73,7 +72,6 @@ export default function MainHomepage({
             <Hero imageCollage={imageCollage} slider={slider} />
             <About galleryTypes={galleryTypes} />
             <Projects projects={featuredProjects} />
-            <MoreAbout />
             <Services services={services as ServicesDocument[]} />
             <TheVoice storyTellerImages={storyTellerImages} />
             <Stats statsImages={statsImages} />

@@ -1,106 +1,141 @@
-import { useState } from "react";
-import { Plus } from "lucide-react";
-import { FaqDocument } from "@/prismicio-types";
+"use client";
 
-const faqs = [
-    {
-        question: "How do I book a session?",
-        answer: "You can book a session by contacting me via email or the contact form on my website. I will guide you through the process and confirm your booking.",
-    },
-    {
-        question: "What's included in your photography packages?",
-        answer: "All packages include a pre-session consultation, the photo session, professional editing, and a digital gallery. Custom packages are also available.",
-    },
-    {
-        question: "How long does it take to receive my photos?",
-        answer: "Typically, you will receive your edited photos within 2-3 weeks after your session.",
-    },
-    {
-        question: "Do you offer destination wedding photography?",
-        answer: "Yes, I am available for destination weddings and travel worldwide to capture your special moments.",
-    },
-    {
-        question: "Can we choose the location for our shoot?",
-        answer: "Absolutely! I am happy to suggest locations or work with your preferred spot.",
-    },
-    {
-        question: "What should we wear for our session?",
-        answer: "Wear outfits that make you feel comfortable and confident. I can provide style tips if needed.",
-    },
-    {
-        question: "Do you offer prints and albums?",
-        answer: "Yes, I offer a variety of print and album options to showcase your photos beautifully.",
-    },
-    {
-        question: "What happens if it rains on the day of our outdoor shoot?",
-        answer: "We can reschedule or find an indoor location. Your comfort and satisfaction are my priority.",
-    },
-    {
-        question: "Do you edit all the photos?",
-        answer: "Yes, all delivered photos are professionally edited for color, lighting, and style.",
-    },
-    {
-        question: "Can I request specific shots or styles?",
-        answer: "Of course! I welcome your ideas and will do my best to accommodate your requests.",
-    },
-];
+import { useRef, useState } from "react";
+import { motion, useInView, AnimatePresence } from "framer-motion";
+import Link from "next/link";
+import { Plus, Minus, ArrowUpRight } from "lucide-react";
+import { FaqDocument } from "@/prismicio-types";
 
 export default function FAQ({ faq }: { faq: FaqDocument[] }) {
     const [open, setOpen] = useState<number | null>(null);
+    const ref = useRef(null);
+    const inView = useInView(ref, { once: true, margin: "-100px" });
+
     return (
-        <section className='w-full bg-black text-white min-h-screen flex flex-col items-center px-2 md:px-0 py-16'>
-            {/* Top Row */}
-            <div className='w-full max-w-5xl grid grid-cols-3 items-center mb-2 text-xs font-semibold tracking-widest'>
-                <div className='text-white/60'>09</div>
-                <div className='text-center text-white/80'>//FAQ</div>
-                <div className='text-right text-white/60'>CONCERNS</div>
-            </div>
-            {/* Heading */}
-            <h1 className='text-2xl md:text-4xl font-extrabold text-center mt-8 mb-12 tracking-tight leading-tight uppercase max-w-3xl mx-auto'>
-                FREQUENTLY
-                <br />
-                ASKED QUESTIONS
-            </h1>
-            {/* FAQ List */}
-            <div className='w-full max-w-5xl divide-y divide-white/10 mt-8'>
-                {faq?.map((faq, idx) => (
-                    <div key={idx}>
-                        <button
-                            className='flex items-center w-full py-6 px-2 md:px-0 group hover:bg-white/5 transition focus:outline-none'
-                            onClick={() => setOpen(open === idx ? null : idx)}
-                            aria-expanded={open === idx}
+        <section
+            ref={ref}
+            id="faq"
+            className="w-full bg-black text-white py-24 md:py-32 overflow-hidden"
+        >
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+                {/* Section label */}
+                <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={inView ? { opacity: 1, x: 0 } : {}}
+                    transition={{ duration: 0.6 }}
+                    className="flex items-center gap-3 mb-16"
+                >
+                    <div className="h-px w-10 bg-amber-400/60" />
+                    <span className="text-[10px] text-amber-400 uppercase tracking-[0.5em]">
+                        FAQ
+                    </span>
+                </motion.div>
+
+                {/* Heading row */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-end mb-16">
+                    <div className="overflow-hidden">
+                        <motion.h2
+                            initial={{ y: 80, opacity: 0 }}
+                            animate={inView ? { y: 0, opacity: 1 } : {}}
+                            transition={{ duration: 1, ease: [0.76, 0, 0.24, 1] }}
+                            className="text-5xl md:text-7xl font-extrabold leading-[0.95] tracking-tight"
                         >
-                            <div className='w-12 text-xs font-bold text-white/60 flex-shrink-0'>
-                                {String(idx + 1).padStart(2, "0")}
-                            </div>
-                            <div className='flex-1 text-left'>
-                                <div className='font-bold text-white text-base md:text-lg uppercase'>
-                                    {faq.data.question}
-                                </div>
-                            </div>
-                            <div
-                                className='w-8 flex justify-end transition-transform duration-300'
-                                style={{
-                                    transform:
-                                        open === idx
-                                            ? "rotate(45deg)"
-                                            : "rotate(0deg)",
-                                }}
-                            >
-                                <Plus className='w-4 h-4 text-white/60' />
-                            </div>
-                        </button>
-                        <div
-                            className={`overflow-hidden transition-all duration-500 bg-black ${open === idx ? "max-h-40 py-4 opacity-100" : "max-h-0 py-0 opacity-0"}`}
-                        >
-                            {open === idx && (
-                                <div className='text-white/80 text-base md:text-lg px-4 md:px-12'>
-                                    {faq.data.answer}
-                                </div>
-                            )}
-                        </div>
+                            Common
+                            <br />
+                            <span className="text-white/20">Questions</span>
+                        </motion.h2>
                     </div>
-                ))}
+
+                    <motion.p
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={inView ? { opacity: 1, y: 0 } : {}}
+                        transition={{ duration: 0.8, delay: 0.3 }}
+                        className="text-white/40 text-base font-light leading-relaxed max-w-sm md:ml-auto"
+                    >
+                        Everything you need to know before booking.
+                        Can't find your answer?{" "}
+                        <Link
+                            href="/contact"
+                            className="text-amber-400 hover:text-amber-300 transition-colors underline underline-offset-2"
+                        >
+                            Just ask.
+                        </Link>
+                    </motion.p>
+                </div>
+
+                {/* FAQ accordion */}
+                <div className="divide-y divide-white/5 mb-16">
+                    {faq?.map((item, idx) => (
+                        <motion.div
+                            key={item.id ?? idx}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={inView ? { opacity: 1, y: 0 } : {}}
+                            transition={{ duration: 0.5, delay: 0.05 * idx }}
+                        >
+                            <button
+                                className="flex items-center w-full py-7 group text-left"
+                                onClick={() => setOpen(open === idx ? null : idx)}
+                                aria-expanded={open === idx}
+                            >
+                                {/* Number */}
+                                <span className="text-[10px] text-amber-500/40 font-mono w-10 flex-shrink-0">
+                                    {String(idx + 1).padStart(2, "0")}
+                                </span>
+
+                                {/* Question */}
+                                <p className="flex-1 text-base md:text-lg font-medium text-white/80 group-hover:text-white transition-colors duration-300 pr-4">
+                                    {item.data.question as string}
+                                </p>
+
+                                {/* Toggle */}
+                                <div className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center flex-shrink-0 group-hover:border-amber-400/40 transition-colors duration-300">
+                                    {open === idx
+                                        ? <Minus size={12} className="text-amber-400" />
+                                        : <Plus size={12} className="text-white/40" />
+                                    }
+                                </div>
+                            </button>
+
+                            {/* Answer */}
+                            <AnimatePresence initial={false}>
+                                {open === idx && (
+                                    <motion.div
+                                        key="answer"
+                                        initial={{ height: 0, opacity: 0 }}
+                                        animate={{ height: "auto", opacity: 1 }}
+                                        exit={{ height: 0, opacity: 0 }}
+                                        transition={{ duration: 0.4, ease: [0.76, 0, 0.24, 1] }}
+                                        className="overflow-hidden"
+                                    >
+                                        <p className="text-white/50 text-sm md:text-base font-light leading-relaxed pl-10 pb-8 max-w-2xl">
+                                            {item.data.answer as string}
+                                        </p>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </motion.div>
+                    ))}
+                </div>
+
+                {/* View all FAQs CTA */}
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={inView ? { opacity: 1 } : {}}
+                    transition={{ duration: 0.6, delay: 0.4 }}
+                    className="flex justify-center"
+                >
+                    <Link href="/faq">
+                        <motion.button
+                            whileHover={{ scale: 1.03 }}
+                            whileTap={{ scale: 0.97 }}
+                            className="flex items-center gap-2 px-8 py-4 border border-white/15 hover:border-white/40 text-white text-xs font-light uppercase tracking-[0.3em] rounded-full transition-all duration-300"
+                        >
+                            View All Questions
+                            <ArrowUpRight size={14} />
+                        </motion.button>
+                    </Link>
+                </motion.div>
             </div>
         </section>
     );

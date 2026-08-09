@@ -76,7 +76,7 @@ export default function MainHomepage({
             <TheVoice storyTellerImages={storyTellerImages} />
             <Stats statsImages={statsImages} />
             <Tools />
-            {/* <Testimonials testimonials={testimonials} /> */}
+            <Testimonials />
             <FAQ faq={faq} />
             <ContactCTA />
             <Footer />

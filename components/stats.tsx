@@ -1,129 +1,133 @@
 "use client";
 
-import { StatsImagesDocument } from "@/prismicio-types";
+import { useRef, useMemo } from "react";
+import { motion, useInView } from "framer-motion";
 import Image from "next/image";
-import { useMemo } from "react";
+import { StatsImagesDocument } from "@/prismicio-types";
 
-export default function Stats({
-    statsImages,
-}: {
-    statsImages: StatsImagesDocument;
-}) {
-    // Prepare images for the marquee
+const STATS = [
+    { number: "100+", label: "Projects Done" },
+    { number: "6+", label: "Years Experience" },
+    { number: "5+", label: "Recognitions" },
+    { number: "99%", label: "Happy Clients" },
+];
+
+export default function Stats({ statsImages }: { statsImages: StatsImagesDocument }) {
+    const ref = useRef(null);
+    const inView = useInView(ref, { once: true, margin: "-100px" });
+
     const images = useMemo(() => {
-        const group = statsImages.data.group_one || [];
-        // Duplicate for seamless marquee
+        const group = statsImages?.data?.group_one ?? [];
         return [...group, ...group];
-    }, [statsImages.data.group_one]);
+    }, [statsImages?.data?.group_one]);
 
-    // Calculate dynamic animation duration based on content length
     const animationDuration = useMemo(() => {
-        const baseSpeed = 60; // pixels per second
-        const imageWidth = 220; // 192px width + 28px gap
-        const totalWidth = images.length * imageWidth;
-        return totalWidth / baseSpeed;
+        const imageWidth = 220;
+        return (images.length * imageWidth) / 60;
     }, [images.length]);
 
-    // Get a large image for the bottom (first image or placeholder)
-    const largeImage = statsImages.data?.feature_image?.url;
-
-    console.log("largeImage", largeImage);
+    const largeImage = statsImages?.data?.feature_image?.url;
 
     return (
-        <section className='w-full bg-black text-white min-h-screen flex flex-col items-center px-2 md:px-0 py-16'>
-            {/* Top Row */}
-            <div className='w-full max-w-6xl grid grid-cols-3 items-center mb-2 text-xs font-semibold tracking-widest'>
-                <div className='text-white/60'>06</div>
-                <div className='text-center text-white/80'>//STATS</div>
-                <div className='text-right text-white/60'>FUN FACTS</div>
-            </div>
-            {/* Stats Row */}
-            <div className='w-full max-w-6xl grid grid-cols-2 md:grid-cols-4 gap-8 mt-8 mb-8'>
-                <div className='text-center'>
-                    <div className='text-5xl md:text-6xl font-extrabold mb-2'>
-                        100+
-                    </div>
-                    <div className='text-xs md:text-sm uppercase tracking-wider text-white/80'>
-                        Projects Done
-                    </div>
-                </div>
-                <div className='text-center'>
-                    <div className='text-5xl md:text-6xl font-extrabold mb-2'>
-                        6+
-                    </div>
-                    <div className='text-xs md:text-sm uppercase tracking-wider text-white/80'>
-                        Years of Experience
-                    </div>
-                </div>
-                <div className='text-center'>
-                    <div className='text-5xl md:text-6xl font-extrabold mb-2'>
-                        5+
-                    </div>
-                    <div className='text-xs md:text-sm uppercase tracking-wider text-white/80'>
-                        Recognitions
-                    </div>
-                </div>
-                <div className='text-center'>
-                    <div className='text-5xl md:text-6xl font-extrabold mb-2'>
-                        99%
-                    </div>
-                    <div className='text-xs md:text-sm uppercase tracking-wider text-white/80'>
-                        Happy Clients
-                    </div>
-                </div>
-            </div>
-            {/* Sliding Images Row */}
-            <div className='w-full max-w-6xl overflow-hidden mb-8'>
-                <div
-                    className='flex space-x-8 animate-marquee-left'
-                    style={{
-                        ["--marquee-duration" as any]: `${animationDuration}s`,
-                    }}
+        <section
+            ref={ref}
+            className="w-full bg-black text-white py-24 md:py-32 overflow-hidden"
+        >
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+                {/* Section label */}
+                <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={inView ? { opacity: 1, x: 0 } : {}}
+                    transition={{ duration: 0.6 }}
+                    className="flex items-center gap-3 mb-16"
                 >
-                    {images.map((imgSrc, index) => (
-                        <div
-                            key={`${imgSrc.images?.url}-${index}`}
-                            className='w-56 h-56 rounded-xl overflow-hidden shadow-xl bg-white/10 border border-white/20 flex items-center justify-center hover:scale-105 transition-transform duration-300 flex-shrink-0'
+                    <div className="h-px w-10 bg-amber-400/60" />
+                    <span className="text-[10px] text-amber-400 uppercase tracking-[0.5em]">
+                        By the Numbers
+                    </span>
+                </motion.div>
+
+                {/* Stats row */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-20 border-y border-white/5 py-12">
+                    {STATS.map((stat, i) => (
+                        <motion.div
+                            key={stat.label}
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={inView ? { opacity: 1, y: 0 } : {}}
+                            transition={{ duration: 0.6, delay: 0.1 * i }}
+                            className="flex flex-col items-center md:items-start gap-2"
                         >
-                            <Image
-                                src={imgSrc.images?.url || ""}
-                                alt=''
-                                width={220}
-                                height={220}
-                                className='object-cover w-full h-full'
-                                loading='lazy'
-                                draggable={false}
-                                aria-hidden='true'
-                                quality={75}
-                                sizes='220px'
-                            />
-                        </div>
+                            <span className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-white leading-none">
+                                {stat.number}
+                            </span>
+                            <span className="text-[10px] text-white/30 uppercase tracking-[0.3em]">
+                                {stat.label}
+                            </span>
+                        </motion.div>
                     ))}
                 </div>
             </div>
-            {/* Large Centered Image */}
-            <div className='w-full max-w-3xl mx-auto mt-8'>
-                <Image
-                    src={largeImage as string}
-                    alt='Stats Large'
-                    width={900}
-                    height={500}
-                    className='rounded-xl object-cover w-full h-[400px]'
-                    sizes='(max-width: 768px) 100vw, 900px'
-                />
-            </div>
+
+            {/* Marquee — full width, no container constraint */}
+            {images.length > 0 && (
+                <div className="w-full overflow-hidden mb-20">
+                    <div
+                        className="flex gap-4"
+                        style={{
+                            animation: `marquee-left ${animationDuration}s linear infinite`,
+                            width: "max-content",
+                        }}
+                    >
+                        {images.map((imgSrc, index) => (
+                            <div
+                                key={index}
+                                className="w-52 h-52 md:w-64 md:h-64 rounded-xl overflow-hidden flex-shrink-0 bg-white/5"
+                            >
+                                {imgSrc?.images?.url && (
+                                    <Image
+                                        src={imgSrc.images.url}
+                                        alt="CoffeeShotIt work"
+                                        width={256}
+                                        height={256}
+                                        className="object-cover w-full h-full hover:scale-105 transition-transform duration-500"
+                                        loading="lazy"
+                                        draggable={false}
+                                        quality={75}
+                                        sizes="256px"
+                                    />
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Large feature image */}
+            {largeImage && (
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <motion.div
+                        initial={{ opacity: 0, y: 40 }}
+                        animate={inView ? { opacity: 1, y: 0 } : {}}
+                        transition={{ duration: 1, delay: 0.3 }}
+                        className="relative h-[400px] md:h-[560px] rounded-2xl overflow-hidden"
+                    >
+                        <Image
+                            src={largeImage}
+                            alt="CoffeeShotIt featured"
+                            fill
+                            className="object-cover"
+                            sizes="100vw"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                    </motion.div>
+                </div>
+            )}
+
             <style jsx>{`
                 @keyframes marquee-left {
-                    0% {
-                        transform: translateX(0);
-                    }
-                    100% {
-                        transform: translateX(-50%);
-                    }
-                }
-                .animate-marquee-left {
-                    animation: marquee-left var(--marquee-duration) linear
-                        infinite;
+                    0% { transform: translateX(0); }
+                    100% { transform: translateX(-50%); }
                 }
             `}</style>
         </section>

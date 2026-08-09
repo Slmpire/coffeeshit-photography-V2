@@ -1,65 +1,107 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useRef } from "react";
+import { motion, useInView } from "framer-motion";
 
-const tools = [
+const TOOLS = [
     {
-        name: "PHOTOSHOP",
-        category: "IMAGE EDITING SOFTWARE",
+        name: "Photoshop",
+        category: "Image Editing",
         description:
-            "Adobe Photoshop is a powerful image editing software used for graphic design, photo retouching, and digital art.",
+            "Industry-standard retouching and compositing for professional-grade final images.",
     },
     {
-        name: "LIGHTROOM",
-        category: "PHOTO MANAGEMENT & EDITING",
+        name: "Lightroom",
+        category: "Photo Management & Colour Grading",
         description:
-            "Adobe Lightroom is a photo editing and organization tool designed for photographers to enhance and catalog images efficiently.",
+            "Cinematic colour grading and batch editing for consistent, signature tones across every gallery.",
     },
     {
-        name: "EVOTO",
-        category: "AI-POWERED PHOTO EDITOR",
+        name: "Evoto",
+        category: "AI-Powered Retouching",
         description:
-            "Evoto is an AI-driven photo editing software that automates retouching, making professional-grade edits quick and effortless.",
+            "AI-driven skin retouching that delivers flawless results while keeping every subject looking natural.",
     },
     {
-        name: "PIXIESET",
-        category: "ONLINE GALLERY & CLIENT DELIVERY",
+        name: "Pixieset",
+        category: "Client Gallery Delivery",
         description:
-            "Pixieset is a platform for photographers to showcase, deliver, and sell their work through beautifully designed online galleries.",
+            "Beautiful private galleries where clients receive, download, and order prints from their sessions.",
     },
 ];
 
 export default function Tools() {
+    const ref = useRef(null);
+    const inView = useInView(ref, { once: true, margin: "-100px" });
+
     return (
-        <section className='w-full bg-black text-white min-h-screen flex flex-col items-center px-2 md:px-0 py-16'>
-            {/* Top Row */}
-            <div className='w-full max-w-5xl grid grid-cols-3 items-center mb-2 text-xs font-semibold tracking-widest'>
-                <div className='text-white/60'>07</div>
-                <div className='text-center text-white/80'>//MY TOOLS</div>
-                <div className='text-right text-white/60'>HOW I CREATE</div>
-            </div>
-            <div className='w-full max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-8 mt-8'>
-                {/* Left: Heading */}
-                <div className='md:col-span-1 flex flex-col justify-start'>
-                    <h1 className='text-4xl md:text-5xl font-extrabold text-left mb-8 md:mb-0'>
-                        STACK & TOOLS
-                    </h1>
-                </div>
-                {/* Right: Tools List */}
-                <div className='md:col-span-2 flex flex-col divide-y divide-white/10'>
-                    {tools.map((tool, idx) => (
-                        <div key={idx} className='py-8 px-2 md:px-8'>
-                            <div className='text-xl md:text-2xl font-bold uppercase mb-2'>
-                                {tool.name}
-                            </div>
-                            <div className='text-xs font-semibold uppercase text-white/40 mb-2 tracking-widest'>
-                                {tool.category}
-                            </div>
-                            <div className='text-sm md:text-base text-white/80 max-w-2xl'>
-                                {tool.description}
-                            </div>
-                        </div>
-                    ))}
+        <section
+            ref={ref}
+            className="w-full bg-black text-white py-24 md:py-32 overflow-hidden"
+        >
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+                {/* Section label */}
+                <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={inView ? { opacity: 1, x: 0 } : {}}
+                    transition={{ duration: 0.6 }}
+                    className="flex items-center gap-3 mb-16"
+                >
+                    <div className="h-px w-10 bg-amber-400/60" />
+                    <span className="text-[10px] text-amber-400 uppercase tracking-[0.5em]">
+                        Stack & Tools
+                    </span>
+                </motion.div>
+
+                {/* Heading + list grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 lg:gap-20">
+
+                    {/* Heading */}
+                    <div className="overflow-hidden">
+                        <motion.h2
+                            initial={{ y: 80, opacity: 0 }}
+                            animate={inView ? { y: 0, opacity: 1 } : {}}
+                            transition={{ duration: 1, ease: [0.76, 0, 0.24, 1] }}
+                            className="text-5xl md:text-6xl font-extrabold leading-[0.95] tracking-tight"
+                        >
+                            How I
+                            <br />
+                            <span className="text-white/20">Create</span>
+                        </motion.h2>
+                    </div>
+
+                    {/* Tools list */}
+                    <div className="lg:col-span-2 divide-y divide-white/5">
+                        {TOOLS.map((tool, idx) => (
+                            <motion.div
+                                key={tool.name}
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={inView ? { opacity: 1, x: 0 } : {}}
+                                transition={{ duration: 0.6, delay: 0.1 * idx }}
+                                className="group py-8 flex gap-6 items-start hover:pl-2 transition-all duration-300"
+                            >
+                                {/* Number */}
+                                <span className="text-[10px] text-amber-500/40 font-mono mt-1 flex-shrink-0">
+                                    {String(idx + 1).padStart(2, "0")}
+                                </span>
+
+                                <div className="flex-1">
+                                    <div className="flex items-center justify-between mb-1">
+                                        <h3 className="text-lg md:text-xl font-bold text-white group-hover:text-amber-300 transition-colors duration-300">
+                                            {tool.name}
+                                        </h3>
+                                        <span className="text-[9px] text-white/20 uppercase tracking-[0.3em] hidden sm:block">
+                                            {tool.category}
+                                        </span>
+                                    </div>
+                                    <p className="text-sm text-white/40 font-light leading-relaxed">
+                                        {tool.description}
+                                    </p>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
                 </div>
             </div>
         </section>

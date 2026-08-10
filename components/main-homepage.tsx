@@ -38,10 +38,6 @@ const Tools = dynamic(() => import("@/components/tools"), {
 const Testimonials = dynamic(() => import("@/components/testimonials"), {
     loading: () => <div className='h-screen' />,
 });
-const Footer = dynamic(() => import("@/components/footer"), {
-    loading: () => <div className='h-screen' />,
-});
-
 interface MainHomepageProps {
     featuredProjects: ProjectsDocument[];
     statsImages: StatsImagesDocument;
@@ -79,7 +75,6 @@ export default function MainHomepage({
             <Testimonials />
             <FAQ faq={faq} />
             <ContactCTA />
-            <Footer />
             {/* <Signature /> */}
         </>
     );

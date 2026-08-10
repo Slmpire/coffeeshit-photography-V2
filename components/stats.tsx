@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef, useMemo } from "react";
-import { motion, useInView } from "framer-motion";
+import { useRef, useMemo, useState, useEffect } from "react";
+import { motion, useInView, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { StatsImagesDocument } from "@/prismicio-types";
 
@@ -15,18 +15,34 @@ const STATS = [
 export default function Stats({ statsImages }: { statsImages: StatsImagesDocument }) {
     const ref = useRef(null);
     const inView = useInView(ref, { once: true, margin: "-100px" });
+    const [currentImg, setCurrentImg] = useState(0);
 
-    const images = useMemo(() => {
-        const group = statsImages?.data?.group_one ?? [];
-        return [...group, ...group];
-    }, [statsImages?.data?.group_one]);
+    const group = useMemo(() => statsImages?.data?.group_one ?? [], [statsImages]);
+    const marqueeImages = useMemo(() => [...group, ...group], [group]);
 
     const animationDuration = useMemo(() => {
-        const imageWidth = 220;
-        return (images.length * imageWidth) / 60;
-    }, [images.length]);
+        return (marqueeImages.length * 220) / 60;
+    }, [marqueeImages.length]);
 
-    const largeImage = statsImages?.data?.feature_image?.url;
+    // Collect all valid image URLs for the cycling large image
+    const cyclingImages = useMemo(() => {
+        const urls = group
+            .map((img) => img?.images?.url)
+            .filter(Boolean) as string[];
+        // Add feature image if available
+        const feature = statsImages?.data?.feature_image?.url;
+        if (feature) urls.unshift(feature);
+        return urls;
+    }, [group, statsImages]);
+
+    // Auto-cycle large image every 4 seconds
+    useEffect(() => {
+        if (cyclingImages.length <= 1) return;
+        const interval = setInterval(() => {
+            setCurrentImg((prev) => (prev + 1) % cyclingImages.length);
+        }, 4000);
+        return () => clearInterval(interval);
+    }, [cyclingImages.length]);
 
     return (
         <section
@@ -69,8 +85,8 @@ export default function Stats({ statsImages }: { statsImages: StatsImagesDocumen
                 </div>
             </div>
 
-            {/* Marquee — full width, no container constraint */}
-            {images.length > 0 && (
+            {/* Marquee — full width */}
+            {marqueeImages.length > 0 && (
                 <div className="w-full overflow-hidden mb-20">
                     <div
                         className="flex gap-4"
@@ -79,7 +95,7 @@ export default function Stats({ statsImages }: { statsImages: StatsImagesDocumen
                             width: "max-content",
                         }}
                     >
-                        {images.map((imgSrc, index) => (
+                        {marqueeImages.map((imgSrc, index) => (
                             <div
                                 key={index}
                                 className="w-52 h-52 md:w-64 md:h-64 rounded-xl overflow-hidden flex-shrink-0 bg-white/5"
@@ -103,23 +119,61 @@ export default function Stats({ statsImages }: { statsImages: StatsImagesDocumen
                 </div>
             )}
 
-            {/* Large feature image */}
-            {largeImage && (
+            {/* Cycling large image */}
+            {cyclingImages.length > 0 && (
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <motion.div
                         initial={{ opacity: 0, y: 40 }}
                         animate={inView ? { opacity: 1, y: 0 } : {}}
                         transition={{ duration: 1, delay: 0.3 }}
-                        className="relative h-[400px] md:h-[560px] rounded-2xl overflow-hidden"
+                        className="relative h-[400px] md:h-[580px] rounded-2xl overflow-hidden"
                     >
-                        <Image
-                            src={largeImage}
-                            alt="CoffeeShotIt featured"
-                            fill
-                            className="object-cover"
-                            sizes="100vw"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                        {/* Cycling images */}
+                        <AnimatePresence mode="sync">
+                            <motion.div
+                                key={currentImg}
+                                className="absolute inset-0"
+                                initial={{ opacity: 0, scale: 1.05 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.98 }}
+                                transition={{ duration: 1.2, ease: "easeInOut" }}
+                            >
+                                <Image
+                                    src={cyclingImages[currentImg]}
+                                    alt="CoffeeShotIt featured work"
+                                    fill
+                                    className="object-cover"
+                                    sizes="100vw"
+                                />
+                            </motion.div>
+                        </AnimatePresence>
+
+                        {/* Overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10" />
+
+                        {/* Image counter */}
+                        <div className="absolute bottom-6 right-6 z-20 flex items-center gap-3">
+                            <span className="text-amber-400 font-mono text-xs">
+                                {String(currentImg + 1).padStart(2, "0")}
+                            </span>
+                            <div className="flex gap-1.5">
+                                {cyclingImages.map((_, i) => (
+                                    <button
+                                        key={i}
+                                        onClick={() => setCurrentImg(i)}
+                                        className={`transition-all duration-500 rounded-full ${
+                                            i === currentImg
+                                                ? "w-6 h-1 bg-amber-400"
+                                                : "w-1 h-1 bg-white/30 hover:bg-white/60"
+                                        }`}
+                                        aria-label={`Go to image ${i + 1}`}
+                                    />
+                                ))}
+                            </div>
+                            <span className="text-white/30 font-mono text-xs">
+                                {String(cyclingImages.length).padStart(2, "0")}
+                            </span>
+                        </div>
                     </motion.div>
                 </div>
             )}

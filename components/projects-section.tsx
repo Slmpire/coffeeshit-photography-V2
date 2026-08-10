@@ -74,9 +74,9 @@ export default function ProjectsSection({ projects }: ProjectsSectionProps) {
                             const year = project?.last_publication_date
                                 ? String(project.last_publication_date).slice(0, 4)
                                 : "2025";
-                            const category = project?.data?.category?.uid
-                                ?.replace(/-/g, " ")
-                                ?.toUpperCase() ?? "PHOTOGRAPHY";
+                            const category = (project?.data?.category as any)?.data?.title
+                                ?? project?.data?.category?.uid?.replace(/-/g, " ")?.toUpperCase()
+                                ?? "PHOTOGRAPHY";
 
                             const isHero = idx === 0;
 
@@ -92,9 +92,8 @@ export default function ProjectsSection({ projects }: ProjectsSectionProps) {
                                         href={`/projects/${project?.uid ?? "#"}`}
                                         className="group block relative overflow-hidden rounded-2xl h-full"
                                     >
-                                        <div className={`relative overflow-hidden ${
-                                            isHero ? "h-[55vh]" : "h-[35vh]"
-                                        }`}>
+                                        <div className={`relative overflow-hidden ${isHero ? "h-[55vh]" : "h-[35vh]"
+                                            }`}>
                                             <Image
                                                 src={project?.data?.cover_image?.url ?? "https://images.prismic.io/coffeeshotit/aFS4vnfc4bHWijt6_Coffee.jpg?auto=format,compress"}
                                                 alt={project?.data?.title ?? "Project"}
@@ -130,11 +129,10 @@ export default function ProjectsSection({ projects }: ProjectsSectionProps) {
                                                     {year}
                                                 </span>
                                                 <div className="flex items-end justify-between">
-                                                    <h3 className={`font-bold text-white leading-tight ${
-                                                        isHero
+                                                    <h3 className={`font-bold text-white leading-tight ${isHero
                                                             ? "text-xl md:text-3xl"
                                                             : "text-base md:text-lg"
-                                                    }`}>
+                                                        }`}>
                                                         {project?.data?.title ?? "Untitled Project"}
                                                     </h3>
                                                     <ArrowUpRight

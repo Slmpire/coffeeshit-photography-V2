@@ -15,7 +15,7 @@ export default function ProjectsSection({ projects }: ProjectsSectionProps) {
     const ref = useRef(null);
     const inView = useInView(ref, { once: true, margin: "-100px" });
 
-    const validProjects = projects?.filter(Boolean).slice(0, 4) ?? [];
+    const validProjects = projects?.filter(Boolean).slice(0, 6) ?? [];
 
     return (
         <section
@@ -66,7 +66,7 @@ export default function ProjectsSection({ projects }: ProjectsSectionProps) {
 
                 {/* Project grid */}
                 {validProjects.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-16">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5 mb-16">
                         {validProjects.map((item: any, idx) => {
                             const project = item?.project ?? item;
                             if (!project) return null;
@@ -77,57 +77,71 @@ export default function ProjectsSection({ projects }: ProjectsSectionProps) {
                             const category = project?.data?.category?.uid
                                 ?.replace(/-/g, " ")
                                 ?.toUpperCase() ?? "PHOTOGRAPHY";
-                            const isLarge = idx === 0;
+
+                            const isHero = idx === 0;
 
                             return (
                                 <motion.div
                                     key={project.id ?? idx}
                                     initial={{ opacity: 0, y: 40 }}
                                     animate={inView ? { opacity: 1, y: 0 } : {}}
-                                    transition={{ duration: 0.7, delay: 0.1 * idx }}
-                                    className={isLarge ? "md:row-span-2" : ""}
+                                    transition={{ duration: 0.7, delay: 0.08 * idx }}
+                                    className={isHero ? "md:col-span-2 md:row-span-2" : ""}
                                 >
                                     <Link
                                         href={`/projects/${project?.uid ?? "#"}`}
-                                        className="group block relative overflow-hidden rounded-2xl"
+                                        className="group block relative overflow-hidden rounded-2xl h-full"
                                     >
-                                        {/* Image */}
-                                        <div className={`relative overflow-hidden ${isLarge ? "h-[480px] md:h-[620px]" : "h-[280px] md:h-[300px]"}`}>
+                                        <div className={`relative overflow-hidden ${
+                                            isHero ? "h-[55vh]" : "h-[35vh]"
+                                        }`}>
                                             <Image
                                                 src={project?.data?.cover_image?.url ?? "https://images.prismic.io/coffeeshotit/aFS4vnfc4bHWijt6_Coffee.jpg?auto=format,compress"}
                                                 alt={project?.data?.title ?? "Project"}
                                                 fill
-                                                className="object-cover transition-transform duration-700 group-hover:scale-105"
-                                                sizes="(max-width: 768px) 100vw, 50vw"
+                                                className="object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-105"
+                                                sizes={isHero
+                                                    ? "(max-width: 768px) 100vw, 66vw"
+                                                    : "(max-width: 768px) 100vw, 33vw"
+                                                }
                                             />
-                                            {/* Overlay */}
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
+
+                                            {/* Gradient */}
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/10 to-transparent" />
+
+                                            {/* Hover overlay */}
+                                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-500" />
+
+                                            {/* Category tag */}
+                                            <div className="absolute top-4 left-4">
+                                                <span className="text-[9px] text-white/60 uppercase tracking-[0.3em] bg-black/40 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/10">
+                                                    {category}
+                                                </span>
+                                            </div>
 
                                             {/* Hover arrow */}
-                                            <motion.div
-                                                initial={{ opacity: 0, scale: 0.8 }}
-                                                whileHover={{ opacity: 1, scale: 1 }}
-                                                className="absolute top-4 right-4 w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300"
-                                            >
-                                                <ArrowUpRight size={16} className="text-black" />
-                                            </motion.div>
-                                        </div>
+                                            <div className="absolute top-4 right-4 w-9 h-9 rounded-full bg-amber-500 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-1 group-hover:translate-y-0">
+                                                <ArrowUpRight size={14} className="text-black" />
+                                            </div>
 
-                                        {/* Card info */}
-                                        <div className="absolute bottom-0 left-0 right-0 p-6">
-                                            <div className="flex items-end justify-between">
-                                                <div>
-                                                    <span className="text-[9px] text-amber-400/70 uppercase tracking-[0.3em] block mb-1">
-                                                        {category} · {year}
-                                                    </span>
-                                                    <h3 className="text-lg md:text-xl font-bold text-white leading-tight">
+                                            {/* Info */}
+                                            <div className="absolute bottom-0 left-0 right-0 p-5">
+                                                <span className="text-[9px] text-amber-400/60 uppercase tracking-[0.3em] block mb-1">
+                                                    {year}
+                                                </span>
+                                                <div className="flex items-end justify-between">
+                                                    <h3 className={`font-bold text-white leading-tight ${
+                                                        isHero
+                                                            ? "text-xl md:text-3xl"
+                                                            : "text-base md:text-lg"
+                                                    }`}>
                                                         {project?.data?.title ?? "Untitled Project"}
                                                     </h3>
+                                                    <ArrowUpRight
+                                                        size={isHero ? 22 : 16}
+                                                        className="text-white/20 group-hover:text-amber-400 transition-colors duration-300 flex-shrink-0 ml-3 mb-0.5"
+                                                    />
                                                 </div>
-                                                <ArrowUpRight
-                                                    size={20}
-                                                    className="text-white/30 group-hover:text-amber-400 transition-colors duration-300 flex-shrink-0 ml-4"
-                                                />
                                             </div>
                                         </div>
                                     </Link>
@@ -137,11 +151,11 @@ export default function ProjectsSection({ projects }: ProjectsSectionProps) {
                     </div>
                 ) : (
                     /* Empty state */
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-16">
-                        {[1, 2, 3, 4].map((i) => (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-16">
+                        {[1, 2, 3, 4, 5, 6].map((i) => (
                             <div
                                 key={i}
-                                className="h-[280px] rounded-2xl bg-white/5 border border-white/5 animate-pulse"
+                                className="h-[35vh] rounded-2xl bg-white/5 border border-white/5 animate-pulse"
                             />
                         ))}
                     </div>

@@ -1,1494 +1,570 @@
 "use client";
 
-import type React from "react";
-
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-    ArrowLeft,
-    Heart,
-    Camera,
-    Calendar,
-    MapPin,
-    Users,
-    Sparkles,
-    Mail,
-    Home,
-    PartyPopper,
-} from "lucide-react";
-import Sidebar from "@/components/sidebar";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import Image from "next/image";
+import {
+    ArrowLeft,
+    ArrowUpRight,
+    Heart,
+    Camera,
+    PartyPopper,
+    CheckCircle,
+    MessageCircle,
+} from "lucide-react";
+import Link from "next/link";
 
-type BookingType = "wedding" | "event" | "studio" | null;
-type BookingState = "selection" | "form" | "success";
-
-// Zod schemas for different booking types
-const baseBookingSchema = z.object({
-    firstName: z.string().min(1, "First name is required"),
-    lastName: z.string().min(1, "Last name is required"),
-    email: z.string().email("Please enter a valid email address"),
-    phone: z.string().min(1, "Phone number is required"),
+// ── Schemas ──────────────────────────────────────────────
+const base = z.object({
+    firstName: z.string().min(1, "Required"),
+    lastName: z.string().min(1, "Required"),
+    email: z.string().email("Enter a valid email"),
+    phone: z.string().min(7, "Enter your WhatsApp number"),
     instagram: z.string().optional(),
 });
 
-const weddingBookingSchema = baseBookingSchema.extend({
-    weddingDate: z.string().min(1, "Wedding date is required"),
+const weddingSchema = base.extend({
+    weddingDate: z.string().min(1, "Required"),
     receptionDate: z.string().optional(),
-    weddingLocation: z.string().min(1, "Wedding location is required"),
+    weddingLocation: z.string().min(1, "Required"),
     receptionLocation: z.string().optional(),
-    aboutWedding: z
-        .string()
-        .min(10, "Please provide more details about your wedding"),
-    aboutCouple: z.string().min(10, "Please tell us more about you two"),
-    whyUs: z.string().min(10, "Please tell us what draws you to our work"),
+    aboutWedding: z.string().min(10, "Please add more detail"),
+    aboutCouple: z.string().min(10, "Please add more detail"),
+    whyUs: z.string().min(10, "Please add more detail"),
 });
 
-const eventBookingSchema = baseBookingSchema.extend({
-    eventType: z.string().min(1, "Event type is required"),
-    eventDate: z.string().min(1, "Event date is required"),
-    eventTime: z.string().min(1, "Event time is required"),
-    eventLocation: z.string().min(1, "Event location is required"),
-    aboutEvent: z
-        .string()
-        .min(10, "Please provide more details about your event"),
-    aboutYou: z
-        .string()
-        .min(10, "Please tell us more about yourself/your group"),
-    whyUs: z.string().min(10, "Please tell us what draws you to our work"),
+const eventSchema = base.extend({
+    eventType: z.string().min(1, "Required"),
+    eventDate: z.string().min(1, "Required"),
+    eventTime: z.string().min(1, "Required"),
+    eventLocation: z.string().min(1, "Required"),
+    aboutEvent: z.string().min(10, "Please add more detail"),
+    aboutYou: z.string().min(10, "Please add more detail"),
+    whyUs: z.string().min(10, "Please add more detail"),
 });
 
-const studioBookingSchema = baseBookingSchema.extend({
-    sessionType: z.string().min(1, "Session type is required"),
-    sessionDate: z.string().min(1, "Session date is required"),
+const studioSchema = base.extend({
+    sessionType: z.string().min(1, "Required"),
+    sessionDate: z.string().min(1, "Required"),
+    aboutSession: z.string().min(10, "Please add more detail"),
 });
 
-type WeddingBookingData = z.infer<typeof weddingBookingSchema>;
-type EventBookingData = z.infer<typeof eventBookingSchema>;
-type StudioBookingData = z.infer<typeof studioBookingSchema>;
+type WeddingData = z.infer<typeof weddingSchema>;
+type EventData = z.infer<typeof eventSchema>;
+type StudioData = z.infer<typeof studioSchema>;
+type BookingType = "wedding" | "event" | "studio" | null;
 
+// ── Shared input styles ───────────────────────────────────
+const input = (err?: boolean) =>
+    `w-full bg-white/[0.03] border ${err ? "border-red-500/50" : "border-white/10 focus:border-amber-400/50"
+    } rounded-xl px-4 py-3.5 text-white text-sm placeholder-white/20 focus:outline-none transition-colors duration-200`;
+
+const label = "block text-[10px] text-white/40 uppercase tracking-[0.3em] mb-2";
+
+// ── Package cards ─────────────────────────────────────────
+const PACKAGES = [
+    {
+        type: "wedding" as BookingType,
+        icon: Heart,
+        title: "Wedding Photography",
+        subtitle: "Full day · Ceremony + Reception",
+        desc: "Capture every moment of your special day from getting ready to the last dance.",
+        price: "From ₦250,000",
+    },
+    {
+        type: "event" as BookingType,
+        icon: PartyPopper,
+        title: "Event Photography",
+        subtitle: "Half day or Full day",
+        desc: "Birthdays, proposals, burials, corporate events, and every celebration in between.",
+        price: "From ₦80,000",
+    },
+    {
+        type: "studio" as BookingType,
+        icon: Camera,
+        title: "Portrait / Studio Session",
+        subtitle: "2–3 hours",
+        desc: "Studio portraits, outdoor sessions, corporate headshots, and collaborations.",
+        price: "From ₦50,000",
+    },
+];
+
+// ── Main page ─────────────────────────────────────────────
 export default function BookingPage() {
     const [bookingType, setBookingType] = useState<BookingType>(null);
-    const [bookingState, setBookingState] = useState<BookingState>("selection");
+    const [step, setStep] = useState<"select" | "form" | "success">("select");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [clientName, setClientName] = useState("");
 
     const handleSubmit = async (data: any) => {
         setIsSubmitting(true);
-
         try {
-            // Add booking type to data
-            const formData = {
-                ...data,
-                bookingType,
-            };
-
-            // Extract name for display
-            const firstName = data.firstName || "";
-            const lastName = data.lastName || "";
-            setClientName(`${firstName} ${lastName}`.trim());
-
-            // Submit to API
-            const response = await fetch("/api/booking", {
+            const res = await fetch("/api/booking", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(formData),
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ ...data, bookingType }),
             });
-
-            if (!response.ok) {
-                throw new Error("Failed to submit booking");
-            }
-
+            if (!res.ok) throw new Error();
+            setClientName(`${data.firstName} ${data.lastName}`.trim());
+            setStep("success");
+        } catch {
+            toast.error("Failed to submit. Please try again or message on WhatsApp.");
+        } finally {
             setIsSubmitting(false);
-            setBookingState("success");
-        } catch (error) {
-            console.error("Error submitting booking:", error);
-            setIsSubmitting(false);
-            toast.error("Failed to submit booking. Please try again.");
         }
     };
 
-    const resetBooking = () => {
-        setBookingType(null);
-        setBookingState("selection");
-        setClientName("");
-    };
-
-    const goHome = () => {
-        window.location.href = "/";
-    };
-
     return (
-        <div className=''>
-            <div className='container mx-auto px-4 md:px-12 py-12 md:py-20'>
-                <AnimatePresence mode='wait'>
-                    {bookingState === "selection" ? (
-                        <BookingTypeSelector
-                            key='selector'
-                            onSelect={(type) => {
-                                setBookingType(type);
-                                setBookingState("form");
-                            }}
-                        />
-                    ) : bookingState === "form" ? (
-                        bookingType === "wedding" ? (
-                            <WeddingBookingForm
-                                key='wedding'
-                                onBack={() => setBookingState("selection")}
-                                onSubmit={handleSubmit}
-                                isSubmitting={isSubmitting}
-                            />
-                        ) : bookingType === "event" ? (
-                            <EventBookingForm
-                                key='event'
-                                onBack={() => setBookingState("selection")}
-                                onSubmit={handleSubmit}
-                                isSubmitting={isSubmitting}
-                            />
-                        ) : (
-                            <StudioBookingForm
-                                key='studio'
-                                onBack={() => setBookingState("selection")}
-                                onSubmit={handleSubmit}
-                                isSubmitting={isSubmitting}
-                            />
-                        )
-                    ) : (
-                        <BookingSuccess
-                            key='success'
-                            clientName={clientName}
-                            bookingType={bookingType}
-                            onGoHome={goHome}
-                            onBookAnother={resetBooking}
-                        />
+        <main className="w-full bg-black text-white min-h-screen">
+            {/* Hero */}
+            <section className="relative pt-32 pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-b from-amber-500/5 via-transparent to-transparent" />
+                <div className="max-w-7xl mx-auto relative z-10">
+                    <div className="flex items-center gap-3 mb-8">
+                        <div className="h-px w-10 bg-amber-400/60" />
+                        <span className="text-[10px] text-amber-400 uppercase tracking-[0.5em]">
+                            Book a Session
+                        </span>
+                    </div>
+                    <h1 className="text-5xl md:text-7xl font-extrabold leading-[0.9] tracking-tight max-w-2xl">
+                        Reserve your
+                        <br />
+                        <span className="text-white/20">moment</span>
+                        <br />
+                        with Coffee.
+                    </h1>
+                </div>
+            </section>
+
+            {/* Content */}
+            <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-32">
+                <AnimatePresence mode="wait">
+
+                    {/* Step 1 — Select package */}
+                    {step === "select" && (
+                        <motion.div
+                            key="select"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            transition={{ duration: 0.4 }}
+                        >
+                            <p className="text-white/40 text-sm mb-10 max-w-md">
+                                Choose the type of session you'd like to book. Coffee will confirm your booking within 24 hours.
+                            </p>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                {PACKAGES.map(({ type, icon: Icon, title, subtitle, desc, price }) => (
+                                    <motion.button
+                                        key={type}
+                                        onClick={() => {
+                                            setBookingType(type);
+                                            setStep("form");
+                                        }}
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        className="group text-left p-6 bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 hover:border-amber-400/30 rounded-2xl transition-all duration-300"
+                                    >
+                                        <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-5 group-hover:bg-amber-500/20 transition-colors duration-300">
+                                            <Icon size={18} className="text-amber-400" />
+                                        </div>
+                                        <h3 className="text-lg font-bold text-white mb-1">
+                                            {title}
+                                        </h3>
+                                        <p className="text-[10px] text-amber-400/60 uppercase tracking-[0.2em] mb-3">
+                                            {subtitle}
+                                        </p>
+                                        <p className="text-sm text-white/40 font-light leading-relaxed mb-5">
+                                            {desc}
+                                        </p>
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-sm font-semibold text-white">
+                                                {price}
+                                            </span>
+                                            <ArrowUpRight
+                                                size={16}
+                                                className="text-white/20 group-hover:text-amber-400 transition-colors duration-300"
+                                            />
+                                        </div>
+                                    </motion.button>
+                                ))}
+                            </div>
+
+                            {/* WhatsApp fallback */}
+                            <div className="mt-10 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                                <p className="text-white/30 text-sm">
+                                    Not sure which to pick?
+                                </p>
+
+                                <a href="https://wa.me/2348116273856?text=Hi%20Coffee%2C%20I%27d%20like%20to%20inquire%20about%20a%20photography%20session"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-2 text-sm text-[#25D366] hover:text-green-400 transition-colors"
+                                >
+                                    <MessageCircle size={16} />
+                                    Chat with Coffee on WhatsApp
+                                </a>
+                            </div>
+                        </motion.div>
+                    )}
+
+                    {/* Step 2 — Form */}
+                    {step === "form" && (
+                        <motion.div
+                            key="form"
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            transition={{ duration: 0.4 }}
+                            className="max-w-3xl"
+                        >
+                            {/* Back button */}
+                            <button
+                                onClick={() => setStep("select")}
+                                className="flex items-center gap-2 text-white/40 hover:text-white text-xs uppercase tracking-[0.2em] mb-10 transition-colors duration-200"
+                            >
+                                <ArrowLeft size={14} />
+                                Change session type
+                            </button>
+
+                            {/* Selected package label */}
+                            <div className="flex items-center gap-3 mb-10">
+                                <div className="px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-full">
+                                    <span className="text-[10px] text-amber-400 uppercase tracking-[0.3em]">
+                                        {bookingType === "wedding"
+                                            ? "Wedding Photography"
+                                            : bookingType === "event"
+                                                ? "Event Photography"
+                                                : "Portrait / Studio Session"}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {bookingType === "wedding" && (
+                                <WeddingForm
+                                    onSubmit={handleSubmit}
+                                    isSubmitting={isSubmitting}
+                                />
+                            )}
+                            {bookingType === "event" && (
+                                <EventForm
+                                    onSubmit={handleSubmit}
+                                    isSubmitting={isSubmitting}
+                                />
+                            )}
+                            {bookingType === "studio" && (
+                                <StudioForm
+                                    onSubmit={handleSubmit}
+                                    isSubmitting={isSubmitting}
+                                />
+                            )}
+                        </motion.div>
+                    )}
+
+                    {/* Step 3 — Success */}
+                    {step === "success" && (
+                        <motion.div
+                            key="success"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6 }}
+                            className="max-w-lg mx-auto text-center py-20"
+                        >
+                            <div className="w-16 h-16 rounded-full bg-green-500/10 border border-green-500/30 flex items-center justify-center mx-auto mb-6">
+                                <CheckCircle size={28} className="text-green-400" />
+                            </div>
+                            <h2 className="text-3xl font-bold text-white mb-3">
+                                You're all set{clientName ? `, ${clientName.split(" ")[0]}` : ""}!
+                            </h2>
+                            <p className="text-white/40 text-sm leading-relaxed mb-8">
+                                Coffee has received your booking request and will get back to you within 24 hours to confirm the details.
+                            </p>
+
+                            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+
+                                <a href="https://wa.me/2348116273856"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-2 px-6 py-3 bg-[#25D366] hover:bg-green-500 text-white text-xs font-bold uppercase tracking-widest rounded-full transition-colors duration-300"
+                                >
+                                    <MessageCircle size={14} />
+                                    Message on WhatsApp
+                                </a>
+                                <Link href="/">
+                                    <button
+                                        className="px-6 py-3 border border-white/15 hover:border-white/40 text-white text-xs uppercase tracking-widest rounded-full transition-colors duration-300"
+                                    >
+                                        Back to Home
+                                    </button>
+                                </Link>
+                            </div>
+                        </motion.div>
                     )}
                 </AnimatePresence>
-            </div>
+            </section>
+        </main>
+    );
+}
+
+// ── Wedding Form ──────────────────────────────────────────
+function WeddingForm({
+    onSubmit,
+    isSubmitting,
+}: {
+    onSubmit: (data: WeddingData) => void;
+    isSubmitting: boolean;
+}) {
+    const { register, handleSubmit, formState: { errors } } =
+        useForm<WeddingData>({ resolver: zodResolver(weddingSchema) });
+
+    return (
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
+            <FormSection title="Your Details">
+                <NameRow register={register} errors={errors} />
+                <Field label="Email" error={errors.email?.message}>
+                    <input {...register("email")} type="email" placeholder="amara@example.com" className={input(!!errors.email)} />
+                </Field>
+                <Field label="WhatsApp Number" error={errors.phone?.message}>
+                    <input {...register("phone")} type="tel" placeholder="+234 800 000 0000" className={input(!!errors.phone)} />
+                </Field>
+                <Field label="Instagram Handle (optional)">
+                    <input {...register("instagram")} placeholder="@yourhandle" className={input()} />
+                </Field>
+            </FormSection>
+
+            <FormSection title="Wedding Details">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <Field label="Wedding Date" error={errors.weddingDate?.message}>
+                        <input {...register("weddingDate")} type="date" className={input(!!errors.weddingDate)} />
+                    </Field>
+                    <Field label="Reception Date (optional)">
+                        <input {...register("receptionDate")} type="date" className={input()} />
+                    </Field>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <Field label="Wedding Location" error={errors.weddingLocation?.message}>
+                        <input {...register("weddingLocation")} placeholder="Lagos, Nigeria" className={input(!!errors.weddingLocation)} />
+                    </Field>
+                    <Field label="Reception Location (optional)">
+                        <input {...register("receptionLocation")} placeholder="City, State" className={input()} />
+                    </Field>
+                </div>
+            </FormSection>
+
+            <FormSection title="Tell Coffee More">
+                <Field label="About your wedding" error={errors.aboutWedding?.message}>
+                    <textarea {...register("aboutWedding")} rows={4} placeholder="What coverage do you need? What's your vision?" className={`${input(!!errors.aboutWedding)} resize-none`} />
+                </Field>
+                <Field label="About you two" error={errors.aboutCouple?.message}>
+                    <textarea {...register("aboutCouple")} rows={4} placeholder="Your story, favourite memories, interests..." className={`${input(!!errors.aboutCouple)} resize-none`} />
+                </Field>
+                <Field label="What draws you to Coffee's work?" error={errors.whyUs?.message}>
+                    <textarea {...register("whyUs")} rows={3} placeholder="What do you love about the style?" className={`${input(!!errors.whyUs)} resize-none`} />
+                </Field>
+            </FormSection>
+
+            <SubmitButton isSubmitting={isSubmitting} label="Send Booking Request" />
+        </form>
+    );
+}
+
+// ── Event Form ────────────────────────────────────────────
+function EventForm({
+    onSubmit,
+    isSubmitting,
+}: {
+    onSubmit: (data: EventData) => void;
+    isSubmitting: boolean;
+}) {
+    const { register, handleSubmit, control, formState: { errors } } =
+        useForm<EventData>({ resolver: zodResolver(eventSchema) });
+
+    return (
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
+            <FormSection title="Your Details">
+                <NameRow register={register} errors={errors} />
+                <Field label="Email" error={errors.email?.message}>
+                    <input {...register("email")} type="email" placeholder="amara@example.com" className={input(!!errors.email)} />
+                </Field>
+                <Field label="WhatsApp Number" error={errors.phone?.message}>
+                    <input {...register("phone")} type="tel" placeholder="+234 800 000 0000" className={input(!!errors.phone)} />
+                </Field>
+                <Field label="Instagram Handle (optional)">
+                    <input {...register("instagram")} placeholder="@yourhandle" className={input()} />
+                </Field>
+            </FormSection>
+
+            <FormSection title="Event Details">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <Field label="Event Type" error={errors.eventType?.message}>
+                        <Controller
+                            name="eventType"
+                            control={control}
+                            render={({ field }) => (
+                                <select {...field} className={`${input(!!errors.eventType)} bg-black appearance-none cursor-pointer`}>
+                                    <option value="">Select event type...</option>
+                                    <option value="burial">Burial</option>
+                                    <option value="proposal">Proposal</option>
+                                    <option value="birthday">Birthday Party</option>
+                                    <option value="end-of-year">End of Year Party</option>
+                                    <option value="corporate">Corporate Event</option>
+                                    <option value="others">Others</option>
+                                </select>
+                            )}
+                        />
+                    </Field>
+                    <Field label="Event Date" error={errors.eventDate?.message}>
+                        <input {...register("eventDate")} type="date" className={input(!!errors.eventDate)} />
+                    </Field>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <Field label="Event Location" error={errors.eventLocation?.message}>
+                        <input {...register("eventLocation")} placeholder="Lagos, Nigeria" className={input(!!errors.eventLocation)} />
+                    </Field>
+                    <Field label="Event Time" error={errors.eventTime?.message}>
+                        <input {...register("eventTime")} type="time" className={input(!!errors.eventTime)} />
+                    </Field>
+                </div>
+            </FormSection>
+
+            <FormSection title="Tell Coffee More">
+                <Field label="About your event" error={errors.aboutEvent?.message}>
+                    <textarea {...register("aboutEvent")} rows={4} placeholder="What coverage do you need? What's your vision?" className={`${input(!!errors.aboutEvent)} resize-none`} />
+                </Field>
+                <Field label="About you / your group" error={errors.aboutYou?.message}>
+                    <textarea {...register("aboutYou")} rows={3} placeholder="Tell Coffee about who's involved..." className={`${input(!!errors.aboutYou)} resize-none`} />
+                </Field>
+                <Field label="What draws you to Coffee's work?" error={errors.whyUs?.message}>
+                    <textarea {...register("whyUs")} rows={3} placeholder="What do you love about the style?" className={`${input(!!errors.whyUs)} resize-none`} />
+                </Field>
+            </FormSection>
+
+            <SubmitButton isSubmitting={isSubmitting} label="Send Booking Request" />
+        </form>
+    );
+}
+
+// ── Studio Form ───────────────────────────────────────────
+function StudioForm({
+    onSubmit,
+    isSubmitting,
+}: {
+    onSubmit: (data: StudioData) => void;
+    isSubmitting: boolean;
+}) {
+    const { register, handleSubmit, control, formState: { errors } } =
+        useForm<StudioData>({ resolver: zodResolver(studioSchema) });
+
+    return (
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
+            <FormSection title="Your Details">
+                <NameRow register={register} errors={errors} />
+                <Field label="Email" error={errors.email?.message}>
+                    <input {...register("email")} type="email" placeholder="amara@example.com" className={input(!!errors.email)} />
+                </Field>
+                <Field label="WhatsApp Number" error={errors.phone?.message}>
+                    <input {...register("phone")} type="tel" placeholder="+234 800 000 0000" className={input(!!errors.phone)} />
+                </Field>
+                <Field label="Instagram Handle (optional)">
+                    <input {...register("instagram")} placeholder="@yourhandle" className={input()} />
+                </Field>
+            </FormSection>
+
+            <FormSection title="Session Details">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <Field label="Session Type" error={errors.sessionType?.message}>
+                        <Controller
+                            name="sessionType"
+                            control={control}
+                            render={({ field }) => (
+                                <select {...field} className={`${input(!!errors.sessionType)} bg-black appearance-none cursor-pointer`}>
+                                    <option value="">Select session type...</option>
+                                    <option value="studio-portraits">Studio Portraits</option>
+                                    <option value="corporate">Corporate / Headshots</option>
+                                    <option value="outdoor">Outdoor Session</option>
+                                    <option value="collaboration">Collaboration</option>
+                                    <option value="others">Others</option>
+                                </select>
+                            )}
+                        />
+                    </Field>
+                    <Field label="Preferred Date" error={errors.sessionDate?.message}>
+                        <input {...register("sessionDate")} type="date" className={input(!!errors.sessionDate)} />
+                    </Field>
+                </div>
+                <Field label="Tell Coffee about your session" error={errors.aboutSession?.message}>
+                    <textarea {...register("aboutSession")} rows={4} placeholder="What's your vision? Any specific look, mood, or outfit in mind?" className={`${input(!!errors.aboutSession)} resize-none`} />
+                </Field>
+            </FormSection>
+
+            <SubmitButton isSubmitting={isSubmitting} label="Send Booking Request" />
+        </form>
+    );
+}
+
+// ── Shared sub-components ─────────────────────────────────
+function FormSection({ title, children }: { title: string; children: React.ReactNode }) {
+    return (
+        <div className="flex flex-col gap-4 p-6 bg-white/[0.02] border border-white/5 rounded-2xl">
+            <p className="text-[10px] text-amber-400/60 uppercase tracking-[0.4em] mb-2">
+                {title}
+            </p>
+            {children}
         </div>
     );
 }
 
-// Success Page Component
-function BookingSuccess({
-    clientName,
-    bookingType,
-    onGoHome,
-    onBookAnother,
+function Field({
+    label: labelText,
+    error,
+    children,
 }: {
-    clientName: string;
-    bookingType: BookingType;
-    onGoHome: () => void;
-    onBookAnother: () => void;
+    label: string;
+    error?: string;
+    children: React.ReactNode;
 }) {
     return (
-        <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className='max-w-2xl mx-auto text-center'
-        >
-            {/* Success Message */}
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className='mb-8'
-            >
-                <div className='flex items-center justify-center gap-3 mb-4'>
-                    <Mail size={32} className='text-white' />
-                </div>
-                <h1 className='text-3xl lg:text-4xl font-bold text-white mb-2'>
-                    Your Message Has Been Sent!
-                </h1>
-            </motion.div>
-
-            {/* Success Image */}
-            <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                className='mb-8'
-            >
-                <div className='relative h-[420px] mx-auto rounded-2xl overflow-hidden'>
-                    <Image
-                        width={420}
-                        height={420}
-                        src='https://images.prismic.io/coffeeshotit/aFS4vnfc4bHWijt6_Coffee.jpg?auto=format,compress'
-                        alt='Celebration moment'
-                        className='w-full h-full object-cover grayscale'
-                    />
-                    <div className='absolute inset-0 bg-gradient-to-t from-black/60 to-transparent' />
-                </div>
-            </motion.div>
-
-            {/* Thank You Message */}
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
-                className='mb-8'
-            >
-                <p className='text-xl  mb-2'>
-                    Thank you for reaching out to us,
-                </p>
-                <p className='text-2xl font-bold text-white mb-6'>
-                    {clientName || "Friend"}!
-                </p>
-
-                <div className='bg-black/40 backdrop-blur-sm border border-amber-800/50 rounded-xl p-6 mb-6'>
-                    <p className='   leading-relaxed'>
-                        We've received your{" "}
-                        {bookingType === "wedding"
-                            ? "wedding photography"
-                            : bookingType === "event"
-                              ? "event photography"
-                              : "studio session"}{" "}
-                        inquiry and we're excited to potentially work with you!
-                        We'll review your details and get back to you within
-                        24-48 hours.
-                    </p>
-                    <p className=' leading-relaxed mt-4'>
-                        If you don't receive a response within 48 hours, please
-                        check your spam folder. In some cases, our reply has
-                        ended up there.
-                    </p>
-                </div>
-            </motion.div>
-
-            {/* Action Buttons */}
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.8 }}
-                className='flex flex-col sm:flex-row gap-4 justify-center'
-            >
-                <Button
-                    onClick={onGoHome}
-                    className='bg-white text-black hover:bg-amber-50 font-semibold px-8 py-3 rounded-xl flex items-center gap-2'
-                >
-                    <Home size={18} />
-                    Go Home
-                </Button>
-
-                <Button
-                    onClick={onBookAnother}
-                    variant='outline'
-                    className='border-amber-600 text-amber-300 hover:bg-amber-800 hover:text-white font-semibold px-8 py-3 rounded-xl'
-                >
-                    Book Another Session
-                </Button>
-            </motion.div>
-
-            {/* Additional Info */}
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 1 }}
-                className='mt-12 text-center'
-            >
-                <p className='text-sm text-amber-500'>
-                    Follow us on social media for the latest updates and
-                    behind-the-scenes content
-                </p>
-            </motion.div>
-        </motion.div>
+        <div className="flex flex-col gap-1.5">
+            <label className={label}>{labelText}</label>
+            {children}
+            {error && <span className="text-[10px] text-red-400">{error}</span>}
+        </div>
     );
 }
 
-// Booking Type Selector Component (unchanged)
-function BookingTypeSelector({
-    onSelect,
-}: {
-    onSelect: (type: BookingType) => void;
-}) {
+function NameRow({ register, errors }: { register: any; errors: any }) {
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className='max-w-6xl mx-auto text-center'
-        >
-            <motion.h1
-                className='text-4xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent'
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-            >
-                Book Your Session
-            </motion.h1>
-
-            <motion.p
-                className='text-xl  mb-12'
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-            >
-                Choose the type of photography session you'd like to book
-            </motion.p>
-
-            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto'>
-                {/* Wedding Photography Card */}
-                <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 }}
-                    whileHover={{ scale: 1.02, y: -5 }}
-                    onClick={() => onSelect("wedding")}
-                    className='group cursor-pointer'
-                >
-                    <div className='bg-black/40 backdrop-blur-sm border border-amber-800/50 rounded-2xl p-8 h-full hover:border-amber-800/30 transition-all duration-300'>
-                        <div className='w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-600 rounded-full flex items-center justify-center mb-6 mx-auto group-hover:scale-110 transition-transform'>
-                            <Heart size={32} className='text-white' />
-                        </div>
-
-                        <h3 className='text-2xl font-bold text-white mb-4'>
-                            Wedding
-                        </h3>
-                        <p className=' mb-6 leading-relaxed'>
-                            Capture your special day with comprehensive wedding
-                            photography coverage including ceremony, reception,
-                            and all the precious moments in between.
-                        </p>
-
-                        <div className='space-y-2 text-sm '>
-                            <div className='flex items-center gap-2'>
-                                <Calendar size={16} />
-                                <span>Full day coverage</span>
-                            </div>
-                            <div className='flex items-center gap-2'>
-                                <MapPin size={16} />
-                                <span>Multiple locations</span>
-                            </div>
-                            <div className='flex items-center gap-2'>
-                                <Users size={16} />
-                                <span>Couple & family portraits</span>
-                            </div>
-                        </div>
-
-                        <Button className='w-full mt-6 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white border-0'>
-                            Book Wedding
-                        </Button>
-                    </div>
-                </motion.div>
-
-                {/* Event Photography Card */}
-                <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 }}
-                    whileHover={{ scale: 1.02, y: -5 }}
-                    onClick={() => onSelect("event")}
-                    className='group cursor-pointer'
-                >
-                    <div className='bg-black/40 backdrop-blur-sm border border-amber-800/50 rounded-2xl p-8 h-full hover:border-amber-800/30 transition-all duration-300'>
-                        <div className='w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-600 rounded-full flex items-center justify-center mb-6 mx-auto group-hover:scale-110 transition-transform'>
-                            <PartyPopper size={32} className='text-white' />
-                        </div>
-
-                        <h3 className='text-2xl font-bold text-white mb-4'>
-                            Event
-                        </h3>
-                        <p className=' mb-6 leading-relaxed'>
-                            Professional photography for all your special events
-                            including birthdays, proposals, corporate events,
-                            and celebrations. Let us capture your memorable
-                            moments.
-                        </p>
-
-                        <div className='space-y-2 text-sm '>
-                            <div className='flex items-center gap-2'>
-                                <Calendar size={16} />
-                                <span>Flexible scheduling</span>
-                            </div>
-                            <div className='flex items-center gap-2'>
-                                <MapPin size={16} />
-                                <span>Your preferred location</span>
-                            </div>
-                            <div className='flex items-center gap-2'>
-                                <Users size={16} />
-                                <span>Group & individual shots</span>
-                            </div>
-                        </div>
-
-                        <Button className='w-full mt-6 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white border-0'>
-                            Book Event
-                        </Button>
-                    </div>
-                </motion.div>
-
-                {/* Studio/Outdoor Photography Card */}
-                <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.6 }}
-                    whileHover={{ scale: 1.02, y: -5 }}
-                    onClick={() => onSelect("studio")}
-                    className='group cursor-pointer'
-                >
-                    <div className='bg-black/40 backdrop-blur-sm border border-amber-800/50 rounded-2xl p-8 h-full hover:border-amber-800/30 transition-all duration-300'>
-                        <div className='w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-600 rounded-full flex items-center justify-center mb-6 mx-auto group-hover:scale-110 transition-transform'>
-                            <Camera size={32} className='text-white' />
-                        </div>
-
-                        <h3 className='text-2xl font-bold text-white mb-4'>
-                            Studio/Outdoor Session
-                        </h3>
-                        <p className=' mb-6 leading-relaxed'>
-                            Professional portrait sessions in our studio or
-                            beautiful outdoor locations. Perfect for
-                            individuals, couples, families, or professional
-                            headshots.
-                        </p>
-
-                        <div className='space-y-2 text-sm '>
-                            <div className='flex items-center gap-2'>
-                                <Sparkles size={16} />
-                                <span>Professional lighting</span>
-                            </div>
-                            <div className='flex items-center gap-2'>
-                                <MapPin size={16} />
-                                <span>Studio or outdoor</span>
-                            </div>
-                            <div className='flex items-center gap-2'>
-                                <Users size={16} />
-                                <span>Individual or group</span>
-                            </div>
-                        </div>
-
-                        <Button className='w-full mt-6 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white border-0'>
-                            Book Session
-                        </Button>
-                    </div>
-                </motion.div>
-            </div>
-        </motion.div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Field label="First Name" error={errors.firstName?.message}>
+                <input {...register("firstName")} placeholder="Amara" className={input(!!errors.firstName)} />
+            </Field>
+            <Field label="Last Name" error={errors.lastName?.message}>
+                <input {...register("lastName")} placeholder="Okafor" className={input(!!errors.lastName)} />
+            </Field>
+        </div>
     );
 }
 
-// Wedding Booking Form Component
-function WeddingBookingForm({
-    onBack,
-    onSubmit,
-    isSubmitting,
-}: {
-    onBack: () => void;
-    onSubmit: (data: WeddingBookingData) => void;
-    isSubmitting: boolean;
-}) {
-    const {
-        register,
-        handleSubmit,
-        formState: { errors },
-    } = useForm<WeddingBookingData>({
-        resolver: zodResolver(weddingBookingSchema),
-    });
-
+function SubmitButton({ isSubmitting, label: labelText }: { isSubmitting: boolean; label: string }) {
     return (
-        <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className='max-w-4xl mx-auto'
+        <motion.button
+            type="submit"
+            disabled={isSubmitting}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="w-full py-4 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 disabled:cursor-not-allowed text-black text-xs font-bold uppercase tracking-[0.2em] rounded-full transition-colors duration-300 flex items-center justify-center gap-2"
         >
-            <div className='flex items-center gap-4 mb-8'>
-                <Button
-                    onClick={onBack}
-                    variant='ghost'
-                    className='text-amber-400 hover:text-white p-2'
-                >
-                    <ArrowLeft size={20} />
-                </Button>
-                <div>
-                    <h1 className='text-3xl lg:text-4xl font-bold text-white'>
-                        Wedding Booking
-                    </h1>
-                    <p className=''>Tell us about your special day</p>
-                </div>
-            </div>
-
-            <form onSubmit={handleSubmit(onSubmit)} className='space-y-8'>
-                <div className='bg-black/40 backdrop-blur-sm border border-amber-800/50 rounded-2xl p-8'>
-                    <h3 className='text-xl font-semibold text-white mb-6'>
-                        Personal Information
-                    </h3>
-
-                    <div className='grid md:grid-cols-2 gap-6 mb-6'>
-                        <div>
-                            <Label
-                                htmlFor='firstName'
-                                className='text-white mb-2 block'
-                            >
-                                First Name
-                            </Label>
-                            <Input
-                                id='firstName'
-                                {...register("firstName")}
-                                placeholder='John'
-                                className={`bg-amber-800/50 border text-white placeholder:text-amber-500 ${
-                                    errors.firstName
-                                        ? "border-red-500 focus:border-red-400"
-                                        : "border-amber-700 focus:border-amber-400"
-                                }`}
-                            />
-                            {errors.firstName && (
-                                <p className='text-red-400 text-sm mt-1'>
-                                    {errors.firstName.message}
-                                </p>
-                            )}
-                        </div>
-                        <div>
-                            <Label
-                                htmlFor='lastName'
-                                className='text-white mb-2 block'
-                            >
-                                Last Name
-                            </Label>
-                            <Input
-                                id='lastName'
-                                {...register("lastName")}
-                                placeholder='Doe'
-                                className={`bg-amber-800/50 border text-white placeholder:text-amber-500 ${
-                                    errors.lastName
-                                        ? "border-red-500 focus:border-red-400"
-                                        : "border-amber-700 focus:border-amber-400"
-                                }`}
-                            />
-                            {errors.lastName && (
-                                <p className='text-red-400 text-sm mt-1'>
-                                    {errors.lastName.message}
-                                </p>
-                            )}
-                        </div>
-                    </div>
-
-                    <div className='space-y-6'>
-                        <div>
-                            <Label
-                                htmlFor='email'
-                                className='text-white mb-2 block'
-                            >
-                                Email
-                            </Label>
-                            <Input
-                                id='email'
-                                type='email'
-                                {...register("email")}
-                                placeholder='coffeeshotit@gmail.com'
-                                className={`bg-amber-800/50 border text-white placeholder:text-amber-500 ${
-                                    errors.email
-                                        ? "border-red-500 focus:border-red-400"
-                                        : "border-amber-700 focus:border-amber-400"
-                                }`}
-                            />
-                            {errors.email && (
-                                <p className='text-red-400 text-sm mt-1'>
-                                    {errors.email.message}
-                                </p>
-                            )}
-                        </div>
-
-                        <div>
-                            <Label
-                                htmlFor='instagram'
-                                className='text-white mb-2 block'
-                            >
-                                Instagram Handle
-                            </Label>
-                            <Input
-                                id='instagram'
-                                {...register("instagram")}
-                                placeholder='@yourhandle'
-                                className='bg-amber-800/50 border border-amber-700 text-white placeholder:text-amber-500 focus:border-amber-400'
-                            />
-                        </div>
-
-                        <div>
-                            <Label
-                                htmlFor='phone'
-                                className='text-white mb-2 block'
-                            >
-                                Phone Number
-                            </Label>
-                            <Input
-                                id='phone'
-                                type='tel'
-                                {...register("phone")}
-                                placeholder='+234 811 627 3856'
-                                className={`bg-amber-800/50 border text-white placeholder:text-amber-500 ${
-                                    errors.phone
-                                        ? "border-red-500 focus:border-red-400"
-                                        : "border-amber-700 focus:border-amber-400"
-                                }`}
-                            />
-                            {errors.phone && (
-                                <p className='text-red-400 text-sm mt-1'>
-                                    {errors.phone.message}
-                                </p>
-                            )}
-                        </div>
-                    </div>
-                </div>
-
-                <div className='bg-black/40 backdrop-blur-sm border border-amber-800/50 rounded-2xl p-8'>
-                    <h3 className='text-xl font-semibold text-white mb-6'>
-                        Wedding Details
-                    </h3>
-
-                    <div className='grid md:grid-cols-2 gap-6 mb-6'>
-                        <div>
-                            <Label
-                                htmlFor='weddingDate'
-                                className='text-white mb-2 block'
-                            >
-                                Wedding Date
-                            </Label>
-                            <Input
-                                id='weddingDate'
-                                type='date'
-                                {...register("weddingDate")}
-                                className={`bg-amber-800/50 border text-white ${
-                                    errors.weddingDate
-                                        ? "border-red-500 focus:border-red-400"
-                                        : "border-amber-700 focus:border-amber-400"
-                                }`}
-                            />
-                            {errors.weddingDate && (
-                                <p className='text-red-400 text-sm mt-1'>
-                                    {errors.weddingDate.message}
-                                </p>
-                            )}
-                        </div>
-                        <div>
-                            <Label
-                                htmlFor='receptionDate'
-                                className='text-white mb-2 block'
-                            >
-                                Reception Date
-                            </Label>
-                            <Input
-                                id='receptionDate'
-                                type='date'
-                                {...register("receptionDate")}
-                                className='bg-amber-800/50 border border-amber-700 text-white focus:border-amber-400'
-                            />
-                        </div>
-                    </div>
-
-                    <div className='grid md:grid-cols-2 gap-6 mb-6'>
-                        <div>
-                            <Label
-                                htmlFor='weddingLocation'
-                                className='text-white mb-2 block'
-                            >
-                                Wedding Location
-                            </Label>
-                            <Input
-                                id='weddingLocation'
-                                {...register("weddingLocation")}
-                                placeholder='City, State'
-                                className={`bg-amber-800/50 border text-white placeholder:text-amber-500 ${
-                                    errors.weddingLocation
-                                        ? "border-red-500 focus:border-red-400"
-                                        : "border-amber-700 focus:border-amber-400"
-                                }`}
-                            />
-                            {errors.weddingLocation && (
-                                <p className='text-red-400 text-sm mt-1'>
-                                    {errors.weddingLocation.message}
-                                </p>
-                            )}
-                        </div>
-                        <div>
-                            <Label
-                                htmlFor='receptionLocation'
-                                className='text-white mb-2 block'
-                            >
-                                Reception Location
-                            </Label>
-                            <Input
-                                id='receptionLocation'
-                                {...register("receptionLocation")}
-                                placeholder='City, State'
-                                className='bg-amber-800/50 border border-amber-700 text-white placeholder:text-amber-500 focus:border-amber-400'
-                            />
-                        </div>
-                    </div>
-                </div>
-
-                <div className='bg-black/40 backdrop-blur-sm border border-amber-800/50 rounded-2xl p-8'>
-                    <h3 className='text-xl font-semibold text-white mb-6'>
-                        Tell Us More
-                    </h3>
-
-                    <div className='space-y-6'>
-                        <div>
-                            <Label
-                                htmlFor='aboutWedding'
-                                className='text-white mb-2 block'
-                            >
-                                Tell us about your wedding
-                            </Label>
-                            <Textarea
-                                id='aboutWedding'
-                                {...register("aboutWedding")}
-                                placeholder="What coverage do you require? What's your vision? What does it look like?"
-                                className={`bg-amber-800/50 border text-white placeholder:text-amber-500 min-h-[120px] ${
-                                    errors.aboutWedding
-                                        ? "border-red-500 focus:border-red-400"
-                                        : "border-amber-700 focus:border-amber-400"
-                                }`}
-                            />
-                            {errors.aboutWedding && (
-                                <p className='text-red-400 text-sm mt-1'>
-                                    {errors.aboutWedding.message}
-                                </p>
-                            )}
-                        </div>
-
-                        <div>
-                            <Label
-                                htmlFor='aboutCouple'
-                                className='text-white mb-2 block'
-                            >
-                                Tell us all about you two!
-                            </Label>
-                            <Textarea
-                                id='aboutCouple'
-                                {...register("aboutCouple")}
-                                placeholder='Your proposal, best dates, favourite memory, interest/hobbies, etc.'
-                                className={`bg-amber-800/50 border text-white placeholder:text-amber-500 min-h-[120px] ${
-                                    errors.aboutCouple
-                                        ? "border-red-500 focus:border-red-400"
-                                        : "border-amber-700 focus:border-amber-400"
-                                }`}
-                            />
-                            {errors.aboutCouple && (
-                                <p className='text-red-400 text-sm mt-1'>
-                                    {errors.aboutCouple.message}
-                                </p>
-                            )}
-                        </div>
-
-                        <div>
-                            <Label
-                                htmlFor='whyUs'
-                                className='text-white mb-2 block'
-                            >
-                                What draws you to our work?
-                            </Label>
-                            <Textarea
-                                id='whyUs'
-                                {...register("whyUs")}
-                                placeholder='Tell us what you love about our photography style...'
-                                className={`bg-amber-800/50 border text-white placeholder:text-amber-500 min-h-[120px] ${
-                                    errors.whyUs
-                                        ? "border-red-500 focus:border-red-400"
-                                        : "border-amber-700 focus:border-amber-400"
-                                }`}
-                            />
-                            {errors.whyUs && (
-                                <p className='text-red-400 text-sm mt-1'>
-                                    {errors.whyUs.message}
-                                </p>
-                            )}
-                        </div>
-                    </div>
-                </div>
-
-                <Button
-                    type='submit'
-                    disabled={isSubmitting}
-                    className='w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white py-4 text-lg font-semibold'
-                >
-                    {isSubmitting ? "Sending Message..." : "Send Message →"}
-                </Button>
-            </form>
-        </motion.div>
-    );
-}
-
-// Event Booking Form Component
-function EventBookingForm({
-    onBack,
-    onSubmit,
-    isSubmitting,
-}: {
-    onBack: () => void;
-    onSubmit: (data: EventBookingData) => void;
-    isSubmitting: boolean;
-}) {
-    const {
-        register,
-        handleSubmit,
-        control,
-        formState: { errors },
-    } = useForm<EventBookingData>({
-        resolver: zodResolver(eventBookingSchema),
-    });
-
-    return (
-        <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className='max-w-4xl mx-auto'
-        >
-            <div className='flex items-center gap-4 mb-8'>
-                <Button
-                    onClick={onBack}
-                    variant='ghost'
-                    className='text-amber-400 hover:text-white p-2'
-                >
-                    <ArrowLeft size={20} />
-                </Button>
-                <div>
-                    <h1 className='text-3xl lg:text-4xl font-bold text-white'>
-                        Event Booking
-                    </h1>
-                    <p className=''>Tell us about your event</p>
-                </div>
-            </div>
-
-            <form onSubmit={handleSubmit(onSubmit)} className='space-y-8'>
-                <div className='bg-black/40 backdrop-blur-sm border border-amber-800/50 rounded-2xl p-8'>
-                    <h3 className='text-xl font-semibold text-white mb-6'>
-                        Personal Information
-                    </h3>
-
-                    <div className='grid md:grid-cols-2 gap-6 mb-6'>
-                        <div>
-                            <Label
-                                htmlFor='firstName'
-                                className='text-white mb-2 block'
-                            >
-                                First Name
-                            </Label>
-                            <Input
-                                id='firstName'
-                                {...register("firstName")}
-                                placeholder='John'
-                                className={`bg-amber-800/50 border text-white placeholder:text-amber-500 ${
-                                    errors.firstName
-                                        ? "border-red-500 focus:border-red-400"
-                                        : "border-amber-700 focus:border-amber-400"
-                                }`}
-                            />
-                            {errors.firstName && (
-                                <p className='text-red-400 text-sm mt-1'>
-                                    {errors.firstName.message}
-                                </p>
-                            )}
-                        </div>
-                        <div>
-                            <Label
-                                htmlFor='lastName'
-                                className='text-white mb-2 block'
-                            >
-                                Last Name
-                            </Label>
-                            <Input
-                                id='lastName'
-                                {...register("lastName")}
-                                placeholder='Doe'
-                                className={`bg-amber-800/50 border text-white placeholder:text-amber-500 ${
-                                    errors.lastName
-                                        ? "border-red-500 focus:border-red-400"
-                                        : "border-amber-700 focus:border-amber-400"
-                                }`}
-                            />
-                            {errors.lastName && (
-                                <p className='text-red-400 text-sm mt-1'>
-                                    {errors.lastName.message}
-                                </p>
-                            )}
-                        </div>
-                    </div>
-
-                    <div className='space-y-6'>
-                        <div>
-                            <Label
-                                htmlFor='email'
-                                className='text-white mb-2 block'
-                            >
-                                Email
-                            </Label>
-                            <Input
-                                id='email'
-                                type='email'
-                                {...register("email")}
-                                placeholder='coffeeshotit@gmail.com'
-                                className={`bg-amber-800/50 border text-white placeholder:text-amber-500 ${
-                                    errors.email
-                                        ? "border-red-500 focus:border-red-400"
-                                        : "border-amber-700 focus:border-amber-400"
-                                }`}
-                            />
-                            {errors.email && (
-                                <p className='text-red-400 text-sm mt-1'>
-                                    {errors.email.message}
-                                </p>
-                            )}
-                        </div>
-
-                        <div>
-                            <Label
-                                htmlFor='instagram'
-                                className='text-white mb-2 block'
-                            >
-                                Instagram Handle
-                            </Label>
-                            <Input
-                                id='instagram'
-                                {...register("instagram")}
-                                placeholder='@yourhandle'
-                                className='bg-amber-800/50 border border-amber-700 text-white placeholder:text-amber-500 focus:border-amber-400'
-                            />
-                        </div>
-
-                        <div>
-                            <Label
-                                htmlFor='phone'
-                                className='text-white mb-2 block'
-                            >
-                                Phone Number
-                            </Label>
-                            <Input
-                                id='phone'
-                                type='tel'
-                                {...register("phone")}
-                                placeholder='(123) 456-7890'
-                                className={`bg-amber-800/50 border text-white placeholder:text-amber-500 ${
-                                    errors.phone
-                                        ? "border-red-500 focus:border-red-400"
-                                        : "border-amber-700 focus:border-amber-400"
-                                }`}
-                            />
-                            {errors.phone && (
-                                <p className='text-red-400 text-sm mt-1'>
-                                    {errors.phone.message}
-                                </p>
-                            )}
-                        </div>
-                    </div>
-                </div>
-
-                <div className='bg-black/40 backdrop-blur-sm border border-amber-800/50 rounded-2xl p-8'>
-                    <h3 className='text-xl font-semibold text-white mb-6'>
-                        Event Details
-                    </h3>
-
-                    <div className='grid md:grid-cols-2 gap-6 mb-6'>
-                        <div>
-                            <Label
-                                htmlFor='eventType'
-                                className='text-white mb-2 block'
-                            >
-                                Event Type
-                            </Label>
-                            <Controller
-                                name='eventType'
-                                control={control}
-                                render={({ field }) => (
-                                    <Select
-                                        onValueChange={field.onChange}
-                                        value={field.value}
-                                    >
-                                        <SelectTrigger
-                                            className={`bg-amber-800/50 border text-white ${
-                                                errors.eventType
-                                                    ? "border-red-500 focus:border-red-400"
-                                                    : "border-amber-700 focus:border-amber-400"
-                                            }`}
-                                        >
-                                            <SelectValue placeholder='Select event type' />
-                                        </SelectTrigger>
-                                        <SelectContent className='bg-amber-800 border-amber-700'>
-                                            <SelectItem
-                                                value='burial'
-                                                className='text-white hover:bg-amber-700'
-                                            >
-                                                Burial
-                                            </SelectItem>
-                                            <SelectItem
-                                                value='proposal'
-                                                className='text-white hover:bg-amber-700'
-                                            >
-                                                Proposal
-                                            </SelectItem>
-                                            <SelectItem
-                                                value='birthday'
-                                                className='text-white hover:bg-amber-700'
-                                            >
-                                                Birthday Party
-                                            </SelectItem>
-                                            <SelectItem
-                                                value='end-of-year'
-                                                className='text-white hover:bg-amber-700'
-                                            >
-                                                End of the Year Party
-                                            </SelectItem>
-                                            <SelectItem
-                                                value='others'
-                                                className='text-white hover:bg-amber-700'
-                                            >
-                                                Others
-                                            </SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                )}
-                            />
-                            {errors.eventType && (
-                                <p className='text-red-400 text-sm mt-1'>
-                                    {errors.eventType.message}
-                                </p>
-                            )}
-                        </div>
-                        <div>
-                            <Label
-                                htmlFor='eventDate'
-                                className='text-white mb-2 block'
-                            >
-                                Event Date
-                            </Label>
-                            <Input
-                                id='eventDate'
-                                type='date'
-                                {...register("eventDate")}
-                                className={`bg-amber-800/50 border text-white ${
-                                    errors.eventDate
-                                        ? "border-red-500 focus:border-red-400"
-                                        : "border-amber-700 focus:border-amber-400"
-                                }`}
-                            />
-                            {errors.eventDate && (
-                                <p className='text-red-400 text-sm mt-1'>
-                                    {errors.eventDate.message}
-                                </p>
-                            )}
-                        </div>
-                    </div>
-
-                    <div className='grid md:grid-cols-2 gap-6 mb-6'>
-                        <div>
-                            <Label
-                                htmlFor='eventLocation'
-                                className='text-white mb-2 block'
-                            >
-                                Event Location
-                            </Label>
-                            <Input
-                                id='eventLocation'
-                                {...register("eventLocation")}
-                                placeholder='City, State'
-                                className={`bg-amber-800/50 border text-white placeholder:text-amber-500 ${
-                                    errors.eventLocation
-                                        ? "border-red-500 focus:border-red-400"
-                                        : "border-amber-700 focus:border-amber-400"
-                                }`}
-                            />
-                            {errors.eventLocation && (
-                                <p className='text-red-400 text-sm mt-1'>
-                                    {errors.eventLocation.message}
-                                </p>
-                            )}
-                        </div>
-                        <div>
-                            <Label
-                                htmlFor='eventTime'
-                                className='text-white mb-2 block'
-                            >
-                                Event Time
-                            </Label>
-                            <Input
-                                id='eventTime'
-                                type='time'
-                                {...register("eventTime")}
-                                className={`bg-amber-800/50 border text-white ${
-                                    errors.eventTime
-                                        ? "border-red-500 focus:border-red-400"
-                                        : "border-amber-700 focus:border-amber-400"
-                                }`}
-                            />
-                            {errors.eventTime && (
-                                <p className='text-red-400 text-sm mt-1'>
-                                    {errors.eventTime.message}
-                                </p>
-                            )}
-                        </div>
-                    </div>
-                </div>
-
-                <div className='bg-black/40 backdrop-blur-sm border border-amber-800/50 rounded-2xl p-8'>
-                    <h3 className='text-xl font-semibold text-white mb-6'>
-                        Tell Us More
-                    </h3>
-
-                    <div className='space-y-6'>
-                        <div>
-                            <Label
-                                htmlFor='aboutEvent'
-                                className='text-white mb-2 block'
-                            >
-                                Tell us about your event
-                            </Label>
-                            <Textarea
-                                id='aboutEvent'
-                                {...register("aboutEvent")}
-                                placeholder="What coverage do you require? What's your vision? What does it look like?"
-                                className={`bg-amber-800/50 border text-white placeholder:text-amber-500 min-h-[120px] ${
-                                    errors.aboutEvent
-                                        ? "border-red-500 focus:border-red-400"
-                                        : "border-amber-700 focus:border-amber-400"
-                                }`}
-                            />
-                            {errors.aboutEvent && (
-                                <p className='text-red-400 text-sm mt-1'>
-                                    {errors.aboutEvent.message}
-                                </p>
-                            )}
-                        </div>
-
-                        <div>
-                            <Label
-                                htmlFor='aboutYou'
-                                className='text-white mb-2 block'
-                            >
-                                Tell us about yourself/your group
-                            </Label>
-                            <Textarea
-                                id='aboutYou'
-                                {...register("aboutYou")}
-                                placeholder='Tell us about the people involved, any special requirements, etc.'
-                                className={`bg-amber-800/50 border text-white placeholder:text-amber-500 min-h-[120px] ${
-                                    errors.aboutYou
-                                        ? "border-red-500 focus:border-red-400"
-                                        : "border-amber-700 focus:border-amber-400"
-                                }`}
-                            />
-                            {errors.aboutYou && (
-                                <p className='text-red-400 text-sm mt-1'>
-                                    {errors.aboutYou.message}
-                                </p>
-                            )}
-                        </div>
-
-                        <div>
-                            <Label
-                                htmlFor='whyUs'
-                                className='text-white mb-2 block'
-                            >
-                                What draws you to our work?
-                            </Label>
-                            <Textarea
-                                id='whyUs'
-                                {...register("whyUs")}
-                                placeholder='Tell us what you love about our photography style...'
-                                className={`bg-amber-800/50 border text-white placeholder:text-amber-500 min-h-[120px] ${
-                                    errors.whyUs
-                                        ? "border-red-500 focus:border-red-400"
-                                        : "border-amber-700 focus:border-amber-400"
-                                }`}
-                            />
-                            {errors.whyUs && (
-                                <p className='text-red-400 text-sm mt-1'>
-                                    {errors.whyUs.message}
-                                </p>
-                            )}
-                        </div>
-                    </div>
-                </div>
-
-                <Button
-                    type='submit'
-                    disabled={isSubmitting}
-                    className='w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white py-4 text-lg font-semibold'
-                >
-                    {isSubmitting ? "Sending Message..." : "Send Message →"}
-                </Button>
-            </form>
-        </motion.div>
-    );
-}
-
-// Studio Booking Form Component
-function StudioBookingForm({
-    onBack,
-    onSubmit,
-    isSubmitting,
-}: {
-    onBack: () => void;
-    onSubmit: (data: StudioBookingData) => void;
-    isSubmitting: boolean;
-}) {
-    const {
-        register,
-        handleSubmit,
-        control,
-        formState: { errors },
-    } = useForm<StudioBookingData>({
-        resolver: zodResolver(studioBookingSchema),
-    });
-
-    return (
-        <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className='max-w-3xl mx-auto'
-        >
-            <div className='flex items-center gap-4 mb-8'>
-                <Button
-                    onClick={onBack}
-                    variant='ghost'
-                    className='text-amber-400 hover:text-white p-2'
-                >
-                    <ArrowLeft size={20} />
-                </Button>
-                <div>
-                    <h1 className='text-3xl lg:text-4xl font-bold text-white'>
-                        Studio & Outdoor Booking
-                    </h1>
-                    <p className='text-amber-400'>Book your portrait session</p>
-                </div>
-            </div>
-
-            <form onSubmit={handleSubmit(onSubmit)} className='space-y-8'>
-                <div className='bg-black/40 backdrop-blur-sm border border-amber-800/50 rounded-2xl p-8'>
-                    <h3 className='text-xl font-semibold text-white mb-6'>
-                        Session Information
-                    </h3>
-
-                    <div className='grid md:grid-cols-2 gap-6 mb-6'>
-                        <div>
-                            <Label
-                                htmlFor='firstName'
-                                className='text-white mb-2 block'
-                            >
-                                First Name
-                            </Label>
-                            <Input
-                                id='firstName'
-                                {...register("firstName")}
-                                placeholder='John'
-                                className={`bg-amber-800/50 border text-white placeholder:text-amber-500 ${
-                                    errors.firstName
-                                        ? "border-red-500 focus:border-red-400"
-                                        : "border-amber-700 focus:border-amber-400"
-                                }`}
-                            />
-                            {errors.firstName && (
-                                <p className='text-red-400 text-sm mt-1'>
-                                    {errors.firstName.message}
-                                </p>
-                            )}
-                        </div>
-                        <div>
-                            <Label
-                                htmlFor='lastName'
-                                className='text-white mb-2 block'
-                            >
-                                Last Name
-                            </Label>
-                            <Input
-                                id='lastName'
-                                {...register("lastName")}
-                                placeholder='Doe'
-                                className={`bg-amber-800/50 border text-white placeholder:text-amber-500 ${
-                                    errors.lastName
-                                        ? "border-red-500 focus:border-red-400"
-                                        : "border-amber-700 focus:border-amber-400"
-                                }`}
-                            />
-                            {errors.lastName && (
-                                <p className='text-red-400 text-sm mt-1'>
-                                    {errors.lastName.message}
-                                </p>
-                            )}
-                        </div>
-                    </div>
-
-                    <div className='space-y-6'>
-                        <div>
-                            <Label
-                                htmlFor='email'
-                                className='text-white mb-2 block'
-                            >
-                                Email
-                            </Label>
-                            <Input
-                                id='email'
-                                type='email'
-                                {...register("email")}
-                                placeholder='coffeeshotit@gmail.com'
-                                className={`bg-amber-800/50 border text-white placeholder:text-amber-500 ${
-                                    errors.email
-                                        ? "border-red-500 focus:border-red-400"
-                                        : "border-amber-700 focus:border-amber-400"
-                                }`}
-                            />
-                            {errors.email && (
-                                <p className='text-red-400 text-sm mt-1'>
-                                    {errors.email.message}
-                                </p>
-                            )}
-                        </div>
-
-                        <div>
-                            <Label
-                                htmlFor='instagram'
-                                className='text-white mb-2 block'
-                            >
-                                IG Handle
-                            </Label>
-                            <Input
-                                id='instagram'
-                                {...register("instagram")}
-                                placeholder='@yourhandle'
-                                className='bg-amber-800/50 border border-amber-700 text-white placeholder:text-amber-500 focus:border-amber-400'
-                            />
-                        </div>
-
-                        <div>
-                            <Label
-                                htmlFor='phone'
-                                className='text-white mb-2 block'
-                            >
-                                Phone Number (WhatsApp)
-                            </Label>
-                            <Input
-                                id='phone'
-                                type='tel'
-                                {...register("phone")}
-                                placeholder='+234 811 627 3856'
-                                className={`bg-amber-800/50 border text-white placeholder:text-amber-500 ${
-                                    errors.phone
-                                        ? "border-red-500 focus:border-red-400"
-                                        : "border-amber-700 focus:border-amber-400"
-                                }`}
-                            />
-                            {errors.phone && (
-                                <p className='text-red-400 text-sm mt-1'>
-                                    {errors.phone.message}
-                                </p>
-                            )}
-                        </div>
-
-                        <div>
-                            <Label
-                                htmlFor='sessionType'
-                                className='text-white mb-2 block'
-                            >
-                                What type of session
-                            </Label>
-                            <Controller
-                                name='sessionType'
-                                control={control}
-                                render={({ field }) => (
-                                    <Select
-                                        onValueChange={field.onChange}
-                                        value={field.value}
-                                    >
-                                        <SelectTrigger
-                                            className={`bg-amber-800/50 border text-white ${
-                                                errors.sessionType
-                                                    ? "border-red-500 focus:border-red-400"
-                                                    : "border-amber-700 focus:border-amber-400"
-                                            }`}
-                                        >
-                                            <SelectValue placeholder='Select session type' />
-                                        </SelectTrigger>
-                                        <SelectContent className='bg-amber-800 border-amber-700'>
-                                            <SelectItem
-                                                value='studio-portraits'
-                                                className='text-white hover:bg-amber-700'
-                                            >
-                                                Studio portraits
-                                            </SelectItem>
-                                            <SelectItem
-                                                value='corporate'
-                                                className='text-white hover:bg-amber-700'
-                                            >
-                                                Corporate
-                                            </SelectItem>
-                                            <SelectItem
-                                                value='outdoor'
-                                                className='text-white hover:bg-amber-700'
-                                            >
-                                                Outdoor
-                                            </SelectItem>
-                                            <SelectItem
-                                                value='collaboration'
-                                                className='text-white hover:bg-amber-700'
-                                            >
-                                                Collaboration
-                                            </SelectItem>
-                                            <SelectItem
-                                                value='others'
-                                                className='text-white hover:bg-amber-700'
-                                            >
-                                                Others
-                                            </SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                )}
-                            />
-                            {errors.sessionType && (
-                                <p className='text-red-400 text-sm mt-1'>
-                                    {errors.sessionType.message}
-                                </p>
-                            )}
-                        </div>
-
-                        <div>
-                            <Label
-                                htmlFor='sessionDate'
-                                className='text-white mb-2 block'
-                            >
-                                Session Date
-                            </Label>
-                            <Input
-                                id='sessionDate'
-                                type='date'
-                                {...register("sessionDate")}
-                                className={`bg-amber-800/50 border text-white ${
-                                    errors.sessionDate
-                                        ? "border-red-500 focus:border-red-400"
-                                        : "border-amber-700 focus:border-amber-400"
-                                }`}
-                            />
-                            {errors.sessionDate && (
-                                <p className='text-red-400 text-sm mt-1'>
-                                    {errors.sessionDate.message}
-                                </p>
-                            )}
-                        </div>
-                    </div>
-                </div>
-
-                <Button
-                    type='submit'
-                    disabled={isSubmitting}
-                    className='w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white py-4 text-lg font-semibold'
-                >
-                    {isSubmitting ? "Booking Session..." : "Book Session →"}
-                </Button>
-            </form>
-        </motion.div>
+            {isSubmitting ? (
+                <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+            ) : (
+                <>
+                    {labelText}
+                    <ArrowUpRight size={14} />
+                </>
+            )}
+        </motion.button>
     );
 }

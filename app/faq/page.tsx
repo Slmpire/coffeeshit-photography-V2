@@ -65,7 +65,7 @@ export default async function FAQPage() {
                             </button>
                         </Link>
                         
-                            href="https://wa.me/2348116273856"
+                            <a href="https://wa.me/2348116273856"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="px-8 py-3.5 border border-white/20 hover:border-white/50 text-white text-xs uppercase tracking-[0.2em] rounded-full transition-all duration-300"

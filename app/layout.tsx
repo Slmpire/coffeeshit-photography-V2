@@ -6,6 +6,8 @@ import Header from "@/components/header";
 import Footer from "@/components/footer";
 import Provider from "@/components/Provider";
 import { Toaster } from "@/components/ui/sonner";
+import WhatsAppButton from "@/components/whatsapp-button";
+import MobileStickyBar from "@/components/mobile-sticky-bar";
 
 const dancingScript = Dancing_Script({
     subsets: ["latin"],
@@ -105,7 +107,9 @@ export default function RootLayout({
                         {children}
                     </main>
                     <Footer />
-                    <Toaster position="bottom-right" />
+                    <WhatsAppButton />
+<MobileStickyBar />
+<Toaster position="bottom-right" />
                 </Provider>
             </body>
         </html>

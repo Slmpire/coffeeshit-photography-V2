@@ -1,227 +1,257 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { useState } from "react";
-import ImageGallery from "@/components/image-gallery";
+import { motion } from "framer-motion";
+import Image from "next/image";
+import Link from "next/link";
+import { ArrowLeft, ArrowUpRight, MapPin, Calendar, User } from "lucide-react";
 import { ProjectsDocument } from "@/prismicio-types";
 import { PrismicRichText } from "@prismicio/react";
-import ImageGrid from "./ImageGrid";
-
-// Mock data with more images
-const getProjectById = (id: string) => {
-    const projects = [
-        {
-            id: 1,
-            title: "Sarah & Michael's Wedding",
-            category: "Wedding",
-            location: "Lagos, Nigeria",
-            date: "December 15, 2024",
-            description:
-                "A beautiful celebration of love captured in the heart of Lagos",
-            coverImage: "/logo.jpg",
-            images: Array(16).fill("/logo.jpg"),
-            client: "Sarah & Michael Johnson",
-            duration: "8 hours",
-            deliverables: "300+ edited photos",
-            tags: ["wedding", "outdoor", "traditional", "modern"],
-        },
-    ];
-
-    return projects.find((p) => p.id === Number.parseInt(id)) || projects[0];
-};
 
 interface ProjectDetailsProps {
     project: ProjectsDocument;
 }
 
 export default function ProjectDetails({ project }: ProjectDetailsProps) {
-    const [isLiked, setIsLiked] = useState(false);
-    const [viewMode, setViewMode] = useState<"masonry" | "grid">("masonry");
+    const [selected, setSelected] = useState<string | null>(null);
+
+    const gallery = project?.data?.gallery ?? [];
+    const coverImage = project?.data?.cover_image?.url;
+    const title = project?.data?.title as string;
+    const client = project?.data?.client as string;
+    const location = project?.data?.location as string;
+    const date = project?.data?.date as string;
+    const category = (project?.data?.category as any)?.uid ?? "";
+
+    const year = date ? new Date(date).getFullYear() : null;
 
     return (
-        <div className='p-4 md:p-12 pt-24 py-24'>
-            <div className='max-w-7xl mx-auto'>
-                {/* Navigation & Actions */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className='flex flex-col lg:flex-row mt-12 justify-between items-start lg:items-center mb-8 space-y-4 lg:space-y-0'
-                >
-                    {/* Left Side - Navigation & Title */}
-                    <div className='flex items-center space-x-6'>
-                        {/* <Link href='/projects'>
-                            <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                className='flex items-center space-x-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-2 text-sm font-medium hover:bg-white/20 transition-colors'
-                            >
-                                <ArrowLeft size={16} />
-                                <span className='hidden sm:inline'>Back</span>
-                            </motion.button>
-                        </Link> */}
+        <main className="w-full bg-black text-white min-h-screen">
 
-                        <div>
-                            <h1 className='text-2xl lg:text-4xl font-bold signature-font'>
-                                {project?.data?.title}
-                            </h1>
-                            {/* <div className='flex items-center space-x-4 mt-2 text-sm text-gray-400'>
-                                <span className='flex items-center space-x-1'>
-                                    <Calendar size={14} />
-                                    <span>{project?.data?.date}</span>
-                                </span>
-                                <span className='flex items-center space-x-1'>
-                                    <MapPin size={14} />
-                                    <span>{project?.data?.location}</span>
-                                </span>
-                                <span className='flex items-center space-x-1'>
-                                    <Clock size={14} />
-                                    <span>{project?.data?.duration}</span>
-                                </span>
-                            </div> */}
+            {/* Hero — full viewport cover image */}
+            <section className="relative h-screen overflow-hidden">
+                {coverImage && (
+                    <Image
+                        src={coverImage}
+                        alt={title ?? "Project"}
+                        fill
+                        className="object-cover"
+                        priority
+                        sizes="100vw"
+                    />
+                )}
+                <div className="absolute inset-0 bg-black/50" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
+
+                {/* Back button */}
+                <div className="absolute top-24 left-4 sm:left-8 z-20">
+                    <Link href="/projects">
+                        <motion.button
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.3 }}
+                            className="flex items-center gap-2 text-white/50 hover:text-white text-xs uppercase tracking-[0.2em] transition-colors duration-200"
+                        >
+                            <ArrowLeft size={14} />
+                            All Projects
+                        </motion.button>
+                    </Link>
+                </div>
+
+                {/* Hero content */}
+                <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-10 lg:p-16 z-10">
+                    <div className="max-w-7xl mx-auto">
+
+                        {/* Category + year */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.4 }}
+                            className="flex items-center gap-3 mb-4"
+                        >
+                            <div className="h-px w-10 bg-amber-400/60" />
+                            <span className="text-[10px] text-amber-400 uppercase tracking-[0.5em]">
+                                {category.replace(/-/g, " ")}
+                                {year && ` · ${year}`}
+                            </span>
+                        </motion.div>
+
+                        {/* Title */}
+                        <div className="overflow-hidden mb-6">
+                            <motion.h1
+                                initial={{ y: 80, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                transition={{ duration: 1, ease: [0.76, 0, 0.24, 1], delay: 0.2 }}
+                                className="text-4xl md:text-6xl lg:text-7xl font-extrabold leading-[0.95] tracking-tight max-w-3xl"
+                            >
+                                {title}
+                            </motion.h1>
+                        </div>
+
+                        {/* Meta */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.6 }}
+                            className="flex flex-wrap items-center gap-6"
+                        >
+                            {client && (
+                                <div className="flex items-center gap-2 text-white/40 text-xs">
+                                    <User size={12} className="text-amber-400/60" />
+                                    <span>{client}</span>
+                                </div>
+                            )}
+                            {location && (
+                                <div className="flex items-center gap-2 text-white/40 text-xs">
+                                    <MapPin size={12} className="text-amber-400/60" />
+                                    <span>{location}</span>
+                                </div>
+                            )}
+                            {date && (
+                                <div className="flex items-center gap-2 text-white/40 text-xs">
+                                    <Calendar size={12} className="text-amber-400/60" />
+                                    <span>{new Date(date).toLocaleDateString("en-NG", { month: "long", year: "numeric" })}</span>
+                                </div>
+                            )}
+                        </motion.div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Description */}
+            {project?.data?.description && (
+                <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+                        <div className="flex items-center gap-3">
+                            <div className="h-px w-10 bg-amber-400/60 flex-shrink-0" />
+                            <span className="text-[10px] text-amber-400 uppercase tracking-[0.5em]">
+                                About this project
+                            </span>
+                        </div>
+                        <div className="text-white/50 text-base font-light leading-relaxed prose prose-invert prose-sm max-w-none">
+                            <PrismicRichText field={project.data.description} />
                         </div>
                     </div>
+                </section>
+            )}
 
-                    {/* Right Side - Actions & View Toggle */}
-                    <div className='flex items-center space-x-4'>
-                        {/* View Mode Toggle */}
-                        {/* <div className='flex items-center bg-white/10 backdrop-blur-sm border border-white/20 rounded-full p-1'>
-                            <motion.button
-                                whileTap={{ scale: 0.95 }}
-                                onClick={() => setViewMode("masonry")}
-                                className={`p-2 rounded-full transition-colors ${
-                                    viewMode === "masonry"
-                                        ? "bg-white text-black"
-                                        : "text-white hover:bg-white/20"
-                                }`}
-                            >
-                                <LayoutGrid size={16} />
-                            </motion.button>
-                            <motion.button
-                                whileTap={{ scale: 0.95 }}
-                                onClick={() => setViewMode("grid")}
-                                className={`p-2 rounded-full transition-colors ${
-                                    viewMode === "grid"
-                                        ? "bg-white text-black"
-                                        : "text-white hover:bg-white/20"
-                                }`}
-                            >
-                                <Grid3X3 size={16} />
-                            </motion.button>
-                        </div> */}
+            {/* Gallery */}
+            {gallery.length > 0 && (
+                <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
 
-                        {/* Action Buttons */}
-                        {/* <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => setIsLiked(!isLiked)}
-                            className={`p-2 rounded-full border transition-colors ${
-                                isLiked
-                                    ? "bg-red-500/20 border-red-500/50 text-red-400"
-                                    : "bg-white/10 border-white/20 text-white hover:bg-white/20"
-                            }`}
-                        >
-                            <Heart
-                                size={16}
-                                className={isLiked ? "fill-current" : ""}
-                            />
-                        </motion.button>
-
-                        <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            className='p-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-white hover:bg-white/20 transition-colors'
-                        >
-                            <Share2 size={16} />
-                        </motion.button>
-
-                        <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            className='flex items-center space-x-2 bg-white text-black rounded-full px-4 py-2 text-sm font-medium hover:bg-amber-50 transition-colors'
-                        >
-                            <Download size={16} />
-                            <span className='hidden sm:inline'>Download</span>
-                        </motion.button> */}
+                    <div className="flex items-center gap-3 mb-10">
+                        <div className="h-px w-10 bg-amber-400/60" />
+                        <span className="text-[10px] text-amber-400 uppercase tracking-[0.5em]">
+                            Gallery · {gallery.length} photos
+                        </span>
                     </div>
-                </motion.div>
 
-                {/* Brief Description */}
-                <motion.p
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                    className=' mb-8 max-w-2xl'
-                >
-                    <PrismicRichText field={project?.data?.description} />
-                    {/* {project?.data?.description} */}
-                </motion.p>
+                    {/* Masonry-style grid */}
+                    <div className="columns-1 sm:columns-2 lg:columns-3 gap-3 space-y-3">
+                        {gallery.map((item: any, idx: number) => {
+                            const url = item?.image?.url;
+                            if (!url) return null;
 
-                {/* Image Gallery */}
-                <ImageGrid
-                    images={project?.data?.gallery || []}
-                    themeColor={"#8B4513"}
-                />
+                            return (
+                                <motion.div
+                                    key={idx}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true, margin: "-50px" }}
+                                    transition={{ duration: 0.6, delay: Math.min(idx * 0.04, 0.4) }}
+                                    className="break-inside-avoid relative overflow-hidden rounded-xl cursor-pointer group"
+                                    onClick={() => setSelected(url)}
+                                >
+                                    <Image
+                                        src={url}
+                                        alt={item?.image?.alt ?? `Gallery image ${idx + 1}`}
+                                        width={800}
+                                        height={600}
+                                        className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
+                                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                                    />
+                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-500" />
+                                    <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                        <ArrowUpRight size={12} className="text-white" />
+                                    </div>
+                                </motion.div>
+                            );
+                        })}
+                    </div>
+                </section>
+            )}
 
-                {/* Minimal Project Info */}
+            {/* Lightbox */}
+            {selected && (
                 <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8 }}
-                    viewport={{ once: true }}
-                    className='mt-16 mb-16'
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 z-[500] bg-black/95 backdrop-blur-md flex items-center justify-center p-4"
+                    onClick={() => setSelected(null)}
                 >
-                    <div className='grid grid-cols-1 md:grid-cols-3 gap-8'>
-                        {project?.data?.client && (
-                            <div className='bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10 text-center'>
-                                <h3 className='text-lg font-semibold mb-2'>
-                                    Client
-                                </h3>
-                                <p className='text-amber-300'>
-                                    {project?.data?.client}
-                                </p>
-                            </div>
-                        )}
-                        {/* {project?.data?.duration && (
-                            <div className='bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10 text-center'>
-                                <h3 className='text-lg font-semibold mb-2'>
-                                    Duration
-                                </h3>
-                                <p className='text-gray-300'>
-                                    {project?.data?.duration}
-                                </p>
-                            </div>
-                        )} */}
-                        {/* {project?.data?.deliverables && (
-                            <div className='bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10 text-center'>
-                                <h3 className='text-lg font-semibold mb-2'>
-                                    Deliverables
-                                </h3>
-                                <p className='text-gray-300'>
-                                    {project?.data?.deliverables}
-                                </p>
-                            </div>
-                        )} */}
-                    </div>
-
-                    {/* Tags */}
-                    <div className='flex flex-wrap justify-center gap-2 mt-8'>
-                        {project.tags.map((tag) => (
-                            <span
-                                key={tag}
-                                className='bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 text-sm text-amber-300'
-                            >
-                                #{tag}
-                            </span>
-                        ))}
-                    </div>
+                    <button
+                        className="absolute top-6 right-6 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
+                        onClick={() => setSelected(null)}
+                    >
+                        ✕
+                    </button>
+                    <motion.div
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ duration: 0.3 }}
+                        className="relative max-w-5xl max-h-[90vh] w-full h-full"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <Image
+                            src={selected}
+                            alt="Full size"
+                            fill
+                            className="object-contain"
+                            sizes="100vw"
+                        />
+                    </motion.div>
                 </motion.div>
+            )}
 
-                {/* Related Projects */}
-                {/* <RelatedProjects
-                    currentProjectId={project.id}
-                    category={project.category}
-                /> */}
-            </div>
-        </div>
+            {/* Bottom CTA */}
+            <section className="border-t border-white/5 py-20">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <h2 className="text-3xl md:text-4xl font-extrabold leading-[0.95] mb-3">
+                                Love this work?
+                                <br />
+                                <span className="text-white/20">Let's create yours.</span>
+                            </h2>
+                            <p className="text-white/40 text-sm font-light">
+                                Book a session with Coffee and get the same level of care and artistry for your special moment.
+                            </p>
+                        </div>
+                        <div className="flex flex-wrap gap-4 md:justify-end">
+                            <Link href="/booking">
+                                <motion.button
+                                    whileHover={{ scale: 1.03 }}
+                                    whileTap={{ scale: 0.97 }}
+                                    className="flex items-center gap-2 px-7 py-3.5 bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold uppercase tracking-[0.2em] rounded-full transition-colors duration-300"
+                                >
+                                    Book a Session
+                                    <ArrowUpRight size={14} />
+                                </motion.button>
+                            </Link>
+                            <Link href="/projects">
+                                <motion.button
+                                    whileHover={{ scale: 1.03 }}
+                                    whileTap={{ scale: 0.97 }}
+                                    className="flex items-center gap-2 px-7 py-3.5 border border-white/20 hover:border-white/50 text-white text-xs uppercase tracking-[0.2em] rounded-full transition-all duration-300"
+                                >
+                                    More Projects
+                                </motion.button>
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
     );
 }

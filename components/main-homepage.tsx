@@ -18,6 +18,7 @@ import ContactCTA from "@/components/contact-cta";
 import Signature from "@/components/signature";
 import TheVoice from "./the-voice";
 import FAQ from "./faq";
+import VideoReel from "./video-reel";
 
 // Lazy load components that are not immediately visible
 const About = dynamic(() => import("@/components/about"), {
@@ -70,9 +71,10 @@ export default function MainHomepage({
             <Projects projects={featuredProjects} />
             <Services services={services as ServicesDocument[]} />
             <TheVoice storyTellerImages={storyTellerImages} />
+            <VideoReel />
+            <Testimonials />
             <Stats statsImages={statsImages} />
             <Tools />
-            <Testimonials />
             <FAQ faq={faq} />
             <ContactCTA />
             {/* <Signature /> */}

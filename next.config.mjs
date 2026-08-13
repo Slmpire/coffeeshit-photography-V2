@@ -12,6 +12,14 @@ const nextConfig = {
                 protocol: "https",
                 hostname: "images.prismic.io",
             },
+            {
+                protocol: "https",
+                hostname: "via.placeholder.com",
+            },
+            {
+                protocol: "https",
+                hostname: "placehold.co",
+            },
         ],
         formats: ["image/webp", "image/avif"],
         minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days

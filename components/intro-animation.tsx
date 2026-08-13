@@ -2,25 +2,47 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { usePathname } from "next/navigation";
 
 export default function IntroAnimation() {
-    const [show, setShow] = useState(true);
-    const [phase, setPhase] = useState<"drawing" | "hold" | "exit">("drawing");
+    const [show, setShow] = useState(false);
+    const [filled, setFilled] = useState(false);
+    const [exiting, setExiting] = useState(false);
+    const pathname = usePathname();
 
     useEffect(() => {
-        // Drawing phase — 2s
-        const holdTimer = setTimeout(() => setPhase("hold"), 2000);
-        // Hold phase — 0.8s
-        const exitTimer = setTimeout(() => setPhase("exit"), 2800);
-        // Remove overlay — 1.2s after exit starts
-        const removeTimer = setTimeout(() => setShow(false), 4000);
+        // Only show on the homepage
+        if (pathname !== "/") {
+            setShow(false);
+            return;
+        }
+
+        // Show every time the homepage is entered/reloaded
+        setShow(true);
+        setFilled(false);
+        setExiting(false);
+
+        // Trace completes
+        const fillTimer = setTimeout(() => {
+            setFilled(true);
+        }, 2200);
+
+        // Start exit animation
+        const exitTimer = setTimeout(() => {
+            setExiting(true);
+        }, 3200);
+
+        // Remove overlay
+        const removeTimer = setTimeout(() => {
+            setShow(false);
+        }, 3900);
 
         return () => {
-            clearTimeout(holdTimer);
+            clearTimeout(fillTimer);
             clearTimeout(exitTimer);
             clearTimeout(removeTimer);
         };
-    }, []);
+    }, [pathname]);
 
     return (
         <AnimatePresence>
@@ -29,84 +51,133 @@ export default function IntroAnimation() {
                     key="intro"
                     initial={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 0.8, ease: "easeInOut" }}
-                    className="fixed inset-0 z-[9999] bg-black flex flex-col items-center justify-center"
+                    transition={{ duration: 0.5 }}
+                    className="fixed inset-0 z-[9999] bg-black flex flex-col items-center justify-center gap-4"
                 >
-                    {/* Logo drawing effect */}
-                    <div className="relative flex flex-col items-center">
-
-                        {/* Main signature text with clip-path reveal */}
-                        <div className="relative overflow-hidden">
-                            <motion.h1
-                                className="signature-font text-[clamp(4rem,15vw,10rem)] text-white leading-none select-none"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                transition={{ duration: 0.1 }}
-                            >
-                                Coffee
-                            </motion.h1>
-
-                            {/* Wipe overlay — sweeps left to right revealing the text */}
-                            <motion.div
-                                className="absolute inset-0 bg-black"
-                                initial={{ x: "0%" }}
-                                animate={phase === "drawing" ? { x: "105%" } : { x: "105%" }}
-                                transition={{
-                                    duration: 1.8,
-                                    ease: [0.76, 0, 0.24, 1],
-                                    delay: 0.2,
-                                }}
-                            />
-
-                            {/* Writing cursor line */}
-                            <motion.div
-                                className="absolute top-0 bottom-0 w-0.5 bg-amber-400"
-                                initial={{ left: "0%", opacity: 1 }}
-                                animate={
-                                    phase === "drawing"
-                                        ? { left: "100%", opacity: 1 }
-                                        : { left: "100%", opacity: 0 }
-                                }
-                                transition={
-                                    phase === "drawing"
-                                        ? { duration: 1.8, ease: [0.76, 0, 0.24, 1], delay: 0.2 }
-                                        : { duration: 0.3 }
-                                }
-                            />
-                        </div>
-
-                        {/* Shotit wordmark — fades in after Coffee is drawn */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 8 }}
-                            animate={phase !== "drawing" ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }}
-                            transition={{ duration: 0.6, ease: "easeOut" }}
-                            className="flex items-center gap-3 mt-2"
+                    {/* SVG traced signature */}
+                    <svg
+                        viewBox="0 0 700 180"
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-[85vw] max-w-2xl"
+                    >
+                        <motion.text
+                            x="50%"
+                            y="78%"
+                            textAnchor="middle"
+                            fontFamily="Dancing Script, cursive"
+                            fontWeight="700"
+                            fontSize="150"
+                            fill="none"
+                            stroke="#D4A843"
+                            strokeWidth="1.2"
+                            initial={{
+                                strokeDasharray: 4000,
+                                strokeDashoffset: 4000,
+                            }}
+                            animate={{
+                                strokeDashoffset: 0,
+                            }}
+                            transition={{
+                                duration: 2.2,
+                                ease: [0.4, 0, 0.2, 1],
+                            }}
                         >
-                            <div className="h-px w-8 bg-amber-400/40" />
-                            <span className="text-[10px] text-amber-400/60 uppercase tracking-[0.6em] font-light">
-                                Shotit Media
-                            </span>
-                            <div className="h-px w-8 bg-amber-400/40" />
-                        </motion.div>
+                            Coffee
+                        </motion.text>
+
+                        {/* Fill layer */}
+                        <text
+                            x="50%"
+                            y="78%"
+                            textAnchor="middle"
+                            fontFamily="Dancing Script, cursive"
+                            fontWeight="700"
+                            fontSize="150"
+                            fill="#D4A843"
+                            stroke="none"
+                            style={{
+                                opacity: filled ? 1 : 0,
+                                transition: "opacity 0.8s ease-in-out",
+                            }}
+                        >
+                            Coffee
+                        </text>
+                    </svg>
+
+                    {/* Shotit wordmark */}
+                    <div
+                        style={{
+                            opacity: filled ? 1 : 0,
+                            transform: filled
+                                ? "translateY(0)"
+                                : "translateY(8px)",
+                            transition: "all 0.6s ease-out",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "12px",
+                        }}
+                    >
+                        <div
+                            style={{
+                                height: 1,
+                                width: 32,
+                                background: "rgba(212,168,67,0.4)",
+                            }}
+                        />
+
+                        <span
+                            style={{
+                                fontSize: "9px",
+                                color: "rgba(212,168,67,0.6)",
+                                textTransform: "uppercase",
+                                letterSpacing: "0.6em",
+                                fontFamily: "inherit",
+                                fontWeight: 300,
+                            }}
+                        >
+                            Shotit Media
+                        </span>
+
+                        <div
+                            style={{
+                                height: 1,
+                                width: 32,
+                                background: "rgba(212,168,67,0.4)",
+                            }}
+                        />
                     </div>
 
                     {/* Bottom tagline */}
-                    <motion.p
-                        initial={{ opacity: 0 }}
-                        animate={phase !== "drawing" ? { opacity: 1 } : { opacity: 0 }}
-                        transition={{ duration: 0.6, delay: 0.2 }}
-                        className="absolute bottom-10 text-[9px] text-white/20 uppercase tracking-[0.6em]"
+                    <div
+                        style={{
+                            position: "absolute",
+                            bottom: 32,
+                            opacity: filled ? 1 : 0,
+                            transition: "opacity 0.6s ease-out 0.3s",
+                        }}
                     >
-                        Capturing reality · Crafting memories
-                    </motion.p>
+                        <span
+                            style={{
+                                fontSize: "9px",
+                                color: "rgba(255,255,255,0.15)",
+                                textTransform: "uppercase",
+                                letterSpacing: "0.5em",
+                            }}
+                        >
+                            Capturing reality · Crafting memories
+                        </span>
+                    </div>
 
-                    {/* Exit flash — amber line sweeps up */}
-                    {phase === "exit" && (
+                    {/* Exit curtain */}
+                    {exiting && (
                         <motion.div
                             className="absolute inset-0 bg-black"
                             initial={{ y: "100%" }}
                             animate={{ y: "0%" }}
-                            transition={{ duration: 0.6, ease: [0.76, 0, 0.24, 1] }}
+                            transition={{
+                                duration: 0.6,
+                                ease: [0.76, 0, 0.24, 1],
+                            }}
                         />
                     )}
                 </motion.div>

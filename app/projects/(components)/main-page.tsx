@@ -1,423 +1,283 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { useState } from "react";
-import ProjectCard from "@/components/project-card";
-import ProjectFilter from "@/components/project-filter";
+import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
+import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 import { CategoriesDocument, ProjectsDocument } from "@/prismicio-types";
 import { useQuery } from "@tanstack/react-query";
 import { getPaginatedProjects } from "../actions";
-import {
-    Pagination,
-    PaginationContent,
-    PaginationEllipsis,
-    PaginationItem,
-    PaginationLink,
-    PaginationNext,
-    PaginationPrevious,
-} from "@/components/ui/pagination";
-import { Camera, Filter, Search, RefreshCw } from "lucide-react";
 
 interface MainPageProps {
     categories: CategoriesDocument[];
 }
 
-export default function Projects({ categories }: MainPageProps) {
+export default function ProjectsMainPage({ categories }: MainPageProps) {
     const [selectedCategory, setSelectedCategory] = useState("all");
-    const [filteredProjects, setFilteredProjects] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
 
-    const {
-        data: projects,
-        isLoading,
-        isError,
-        refetch,
-        isRefetching,
-    } = useQuery({
+    const { data, isLoading } = useQuery({
         queryKey: ["projects", selectedCategory, currentPage],
         queryFn: () =>
             getPaginatedProjects(
                 currentPage,
-                10,
+                12,
                 selectedCategory === "all" ? "" : selectedCategory
             ),
-        staleTime: 1000 * 60 * 5, // 5 minutes - data becomes stale after 5 minutes
-        gcTime: 1000 * 60 * 10, // 10 minutes - cache garbage collection
-        refetchOnWindowFocus: true, // Refetch when window regains focus
-        refetchOnMount: true, // Always refetch when component mounts
-        retry: 3, // Retry failed requests 3 times
-        retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
+        staleTime: 1000 * 60 * 5,
     });
 
-    const handleCategoryChange = (category: string) => {
-        setSelectedCategory(category);
-        setCurrentPage(1); // Reset to first page when category changes
+    const handleCategory = (cat: string) => {
+        setSelectedCategory(cat);
+        setCurrentPage(1);
     };
 
-    const handlePageChange = (page: number) => {
-        setCurrentPage(page);
-        // Scroll to top when page changes
-        window.scrollTo({ top: 0, behavior: "smooth" });
-    };
-
-    const handleRefresh = () => {
-        refetch();
-    };
-
-    // Generate page numbers for pagination
-    const generatePageNumbers = () => {
-        if (!projects?.totalPages) return [];
-
-        const totalPages = projects.totalPages;
-        const current = currentPage;
-        const pages: (number | string)[] = [];
-
-        if (totalPages <= 7) {
-            // Show all pages if total is 7 or less
-            for (let i = 1; i <= totalPages; i++) {
-                pages.push(i);
-            }
-        } else {
-            // Always show first page
-            pages.push(1);
-
-            if (current > 3) {
-                pages.push("ellipsis-start");
-            }
-
-            // Show pages around current page
-            const start = Math.max(2, current - 1);
-            const end = Math.min(totalPages - 1, current + 1);
-
-            for (let i = start; i <= end; i++) {
-                pages.push(i);
-            }
-
-            if (current < totalPages - 2) {
-                pages.push("ellipsis-end");
-            }
-
-            // Always show last page
-            if (totalPages > 1) {
-                pages.push(totalPages);
-            }
-        }
-
-        return pages;
-    };
-
-    // Empty state component
-    const EmptyState = () => (
-        <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className='text-center py-20'
-        >
-            <div className='relative mb-8'>
-                <motion.div
-                    animate={{
-                        rotate: [0, 5, -5, 0],
-                        scale: [1, 1.05, 1],
-                    }}
-                    transition={{
-                        duration: 3,
-                        repeat: Infinity,
-                        ease: "easeInOut",
-                    }}
-                    className='inline-flex items-center justify-center w-24 h-24 bg-white/5 backdrop-blur-sm rounded-full border border-white/10 mb-6'
-                >
-                    <Camera className='w-12 h-12 text-white/60' />
-                </motion.div>
-
-                {/* Floating elements */}
-                <motion.div
-                    animate={{
-                        y: [0, -10, 0],
-                        opacity: [0.3, 0.7, 0.3],
-                    }}
-                    transition={{
-                        duration: 4,
-                        repeat: Infinity,
-                        ease: "easeInOut",
-                    }}
-                    className='absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r from-amber-500/20 to-orange-500/20 rounded-full blur-sm'
-                />
-                <motion.div
-                    animate={{
-                        y: [0, 10, 0],
-                        opacity: [0.3, 0.7, 0.3],
-                    }}
-                    transition={{
-                        duration: 3,
-                        repeat: Infinity,
-                        ease: "easeInOut",
-                        delay: 1,
-                    }}
-                    className='absolute -bottom-2 -left-2 w-6 h-6 bg-gradient-to-r from-amber-500/20 to-orange-500/20 rounded-full blur-sm'
-                />
-            </div>
-
-            <h3 className='text-2xl lg:text-3xl font-bold mb-4 signature-font'>
-                {selectedCategory === "all"
-                    ? "No Projects Found"
-                    : `No ${selectedCategory} Projects`}
-            </h3>
-
-            <p className='text-lg text-amber-300 max-w-md mx-auto mb-8 leading-relaxed'>
-                {selectedCategory === "all"
-                    ? "It looks like there are no projects available at the moment. Check back soon for new photography work!"
-                    : `No projects found in the ${selectedCategory} category. Try selecting a different category or check back later.`}
-            </p>
-
-            <div className='flex flex-col sm:flex-row gap-4 justify-center items-center'>
-                <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => handleCategoryChange("all")}
-                    className='flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-6 py-3 text-sm font-medium hover:bg-white/20 transition-colors'
-                >
-                    <Search className='w-4 h-4' />
-                    View All Projects
-                </motion.button>
-
-                <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() =>
-                        window.scrollTo({ top: 0, behavior: "smooth" })
-                    }
-                    className='flex items-center gap-2 bg-transparent border border-white/20 rounded-full px-6 py-3 text-sm font-medium hover:bg-white/10 transition-colors'
-                >
-                    <Filter className='w-4 h-4' />
-                    Change Category
-                </motion.button>
-            </div>
-
-            {/* Decorative background elements */}
-            <div className='absolute inset-0 pointer-events-none overflow-hidden'>
-                <div className='absolute top-1/4 left-1/4 w-32 h-32 bg-gradient-to-r from-amber-500/5 to-orange-500/5 rounded-full blur-3xl' />
-                <div className='absolute bottom-1/4 right-1/4 w-40 h-40 bg-gradient-to-r from-amber-500/5 to-orange-500/5 rounded-full blur-3xl' />
-            </div>
-        </motion.div>
-    );
+    const projects = data?.data ?? [];
+    const totalPages = data?.totalPages ?? 1;
 
     return (
-        <div className='p-4 md:p-12 pt-24'>
-            {/* Page Header */}
-            <motion.div
-                initial={{ opacity: 0, y: 50 }}
-                animate={{ opacity: 1, y: 0 }}
-                className='text-center mb-16'
-            >
-                <h1 className='text-4xl lg:text-6xl font-bold mb-6 signature-font'>
-                    My Projects
-                </h1>
-                <p className='text-lg lg:text-xl  max-w-2xl mx-auto'>
-                    A curated collection of my photography work across various
-                    disciplines and moments
-                </p>
-            </motion.div>
+        <main className="w-full bg-black text-white min-h-screen">
+
+            {/* Hero */}
+            <section className="pt-32 pb-16 px-4 sm:px-6 lg:px-8">
+                <div className="max-w-7xl mx-auto">
+                    <div className="flex items-center gap-3 mb-8">
+                        <div className="h-px w-10 bg-amber-400/60" />
+                        <span className="text-[10px] text-amber-400 uppercase tracking-[0.5em]">
+                            Projects
+                        </span>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-end">
+                        <h1 className="text-5xl md:text-7xl font-extrabold leading-[0.9] tracking-tight">
+                            All
+                            <br />
+                            <span className="text-white/20">Projects</span>
+                        </h1>
+                        <p className="text-white/40 text-base font-light leading-relaxed max-w-sm md:ml-auto">
+                            A curated collection of moments, emotions, and stories captured through Coffee's lens.
+                        </p>
+                    </div>
+                </div>
+            </section>
 
             {/* Filter */}
-            <ProjectFilter
-                categories={categories}
-                selectedCategory={selectedCategory}
-                onCategoryChange={handleCategoryChange}
-            />
-
-            {/* Refresh Button */}
-            <div className='flex justify-end mb-8'>
-                <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={handleRefresh}
-                    disabled={isRefetching}
-                    className='flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-2 text-sm font-medium hover:bg-white/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
-                >
-                    <RefreshCw
-                        className={`w-4 h-4 ${isRefetching ? "animate-spin" : ""}`}
-                    />
-                    {isRefetching ? "Refreshing..." : "Refresh"}
-                </motion.button>
-            </div>
-
-            {/* Loading State */}
-            {isLoading && (
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className='text-center py-20'
-                >
-                    <div className='inline-flex items-center justify-center w-16 h-16 bg-white/5 backdrop-blur-sm rounded-full border border-white/10 mb-6'>
-                        <motion.div
-                            animate={{ rotate: 360 }}
-                            transition={{
-                                duration: 1,
-                                repeat: Infinity,
-                                ease: "linear",
-                            }}
-                            className='w-8 h-8 border-2 border-white/20 border-t-white/60 rounded-full'
-                        />
-                    </div>
-                    <p className='text-lg text-amber-300'>
-                        Loading projects...
-                    </p>
-                </motion.div>
-            )}
-
-            {/* Error State */}
-            {isError && (
-                <motion.div
-                    initial={{ opacity: 0, y: 50 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className='text-center py-20'
-                >
-                    <div className='inline-flex items-center justify-center w-16 h-16 bg-red-500/10 backdrop-blur-sm rounded-full border border-red-500/20 mb-6'>
-                        <div className='w-8 h-8 text-red-400'>⚠️</div>
-                    </div>
-                    <h3 className='text-xl font-bold mb-2'>
-                        Something went wrong
-                    </h3>
-                    <p className='text-amber-300 mb-4'>
-                        Failed to load projects. Please try again later.
-                    </p>
-                    <div className='flex gap-4 justify-center'>
+            <section className="px-4 sm:px-6 lg:px-8 mb-12">
+                <div className="max-w-7xl mx-auto">
+                    <div className="flex flex-wrap items-center gap-2">
+                        {/* All button */}
                         <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => refetch()}
-                            className='bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-6 py-3 text-sm font-medium hover:bg-white/20 transition-colors'
+                            onClick={() => handleCategory("all")}
+                            whileHover={{ scale: 1.03 }}
+                            whileTap={{ scale: 0.97 }}
+                            className={`px-4 py-2 text-[10px] uppercase tracking-[0.3em] rounded-full border transition-all duration-300 ${
+                                selectedCategory === "all"
+                                    ? "bg-amber-500 border-amber-500 text-black font-bold"
+                                    : "border-white/15 text-white/40 hover:border-white/40 hover:text-white"
+                            }`}
                         >
-                            Try Again
+                            All
                         </motion.button>
-                        <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => window.location.reload()}
-                            className='bg-transparent border border-white/20 rounded-full px-6 py-3 text-sm font-medium hover:bg-white/10 transition-colors'
-                        >
-                            Reload Page
-                        </motion.button>
-                    </div>
-                </motion.div>
-            )}
 
-            {/* Projects Grid or Empty State */}
-            {!isLoading && !isError && (
-                <>
-                    {projects?.data && projects.data.length > 0 ? (
-                        <>
-                            <motion.div
-                                layout
-                                className='grid grid-cols-1 md:grid-cols-2  gap-8'
+                        {/* Category buttons */}
+                        {categories?.map((cat) => (
+                            <motion.button
+                                key={cat.id}
+                                onClick={() => handleCategory(cat.uid)}
+                                whileHover={{ scale: 1.03 }}
+                                whileTap={{ scale: 0.97 }}
+                                className={`px-4 py-2 text-[10px] uppercase tracking-[0.3em] rounded-full border transition-all duration-300 ${
+                                    selectedCategory === cat.uid
+                                        ? "bg-amber-500 border-amber-500 text-black font-bold"
+                                        : "border-white/15 text-white/40 hover:border-white/40 hover:text-white"
+                                }`}
                             >
-                                {projects.data.map(
-                                    (project: ProjectsDocument) => (
-                                        <ProjectCard
-                                            key={project.id}
-                                            project={project}
-                                        />
-                                    )
-                                )}
-                            </motion.div>
+                                {cat.data.title as string}
+                            </motion.button>
+                        ))}
+                    </div>
+                </div>
+            </section>
 
-                            {/* Pagination */}
-                            {projects && projects.totalPages > 1 && (
-                                <motion.div
-                                    initial={{ opacity: 0, y: 30 }}
-                                    whileInView={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.6, delay: 0.5 }}
-                                    viewport={{ once: true }}
-                                    className='mt-16'
-                                >
-                                    <Pagination>
-                                        <PaginationContent>
-                                            {/* Previous Button */}
-                                            <PaginationItem>
-                                                <PaginationPrevious
-                                                    href='#'
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        if (currentPage > 1) {
-                                                            handlePageChange(
-                                                                currentPage - 1
-                                                            );
-                                                        }
-                                                    }}
-                                                    className={
-                                                        currentPage <= 1
-                                                            ? "pointer-events-none opacity-50"
-                                                            : ""
+            {/* Projects grid */}
+            <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
+                <AnimatePresence mode="wait">
+                    {isLoading ? (
+                        /* Skeleton */
+                        <motion.div
+                            key="skeleton"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+                        >
+                            {[1, 2, 3, 4, 5, 6].map((i) => (
+                                <div
+                                    key={i}
+                                    className="h-[40vh] rounded-2xl bg-white/[0.03] animate-pulse"
+                                />
+                            ))}
+                        </motion.div>
+                    ) : projects.length > 0 ? (
+                        <motion.div
+                            key={`${selectedCategory}-${currentPage}`}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.5 }}
+                            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+                        >
+                            {projects.map((project: ProjectsDocument, idx: number) => {
+                                const year = project?.last_publication_date
+                                    ? String(project.last_publication_date).slice(0, 4)
+                                    : "2025";
+                                const category = (project?.data?.category as any)?.uid
+                                    ?.replace(/-/g, " ")
+                                    ?.toUpperCase() ?? "PHOTOGRAPHY";
+                                const isLarge = idx === 0;
+
+                                return (
+                                    <motion.div
+                                        key={project.id}
+                                        initial={{ opacity: 0, y: 30 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.6, delay: Math.min(idx * 0.07, 0.4) }}
+                                        className={isLarge ? "md:col-span-2" : ""}
+                                    >
+                                        <Link
+                                            href={`/projects/${project.uid}`}
+                                            className="group block relative overflow-hidden rounded-2xl"
+                                        >
+                                            <div className={`relative overflow-hidden ${
+                                                isLarge ? "h-[55vh]" : "h-[40vh]"
+                                            }`}>
+                                                <Image
+                                                    src={project?.data?.cover_image?.url ?? "https://images.prismic.io/coffeeshotit/aFS4vnfc4bHWijt6_Coffee.jpg?auto=format,compress"}
+                                                    alt={project?.data?.title as string ?? "Project"}
+                                                    fill
+                                                    className="object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-105"
+                                                    sizes={isLarge
+                                                        ? "(max-width: 768px) 100vw, 66vw"
+                                                        : "(max-width: 768px) 100vw, 33vw"
                                                     }
+                                                    loading={idx < 3 ? "eager" : "lazy"}
                                                 />
-                                            </PaginationItem>
 
-                                            {/* Page Numbers */}
-                                            {generatePageNumbers().map(
-                                                (page, index) => (
-                                                    <PaginationItem key={index}>
-                                                        {page ===
-                                                            "ellipsis-start" ||
-                                                        page ===
-                                                            "ellipsis-end" ? (
-                                                            <PaginationEllipsis />
-                                                        ) : (
-                                                            <PaginationLink
-                                                                href='#'
-                                                                onClick={(
-                                                                    e
-                                                                ) => {
-                                                                    e.preventDefault();
-                                                                    handlePageChange(
-                                                                        page as number
-                                                                    );
-                                                                }}
-                                                                isActive={
-                                                                    currentPage ===
-                                                                    page
-                                                                }
-                                                            >
-                                                                {page}
-                                                            </PaginationLink>
-                                                        )}
-                                                    </PaginationItem>
-                                                )
-                                            )}
+                                                {/* Gradient */}
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/10 to-transparent" />
 
-                                            {/* Next Button */}
-                                            <PaginationItem>
-                                                <PaginationNext
-                                                    href='#'
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        if (
-                                                            currentPage <
-                                                            projects.totalPages
-                                                        ) {
-                                                            handlePageChange(
-                                                                currentPage + 1
-                                                            );
-                                                        }
-                                                    }}
-                                                    className={
-                                                        currentPage >=
-                                                        projects.totalPages
-                                                            ? "pointer-events-none opacity-50"
-                                                            : ""
-                                                    }
-                                                />
-                                            </PaginationItem>
-                                        </PaginationContent>
-                                    </Pagination>
-                                </motion.div>
-                            )}
-                        </>
+                                                {/* Hover overlay */}
+                                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-500" />
+
+                                                {/* Category tag */}
+                                                <div className="absolute top-4 left-4">
+                                                    <span className="text-[9px] text-white/60 uppercase tracking-[0.3em] bg-black/40 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/10">
+                                                        {category}
+                                                    </span>
+                                                </div>
+
+                                                {/* Hover arrow */}
+                                                <div className="absolute top-4 right-4 w-9 h-9 rounded-full bg-amber-500 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-1 group-hover:translate-y-0">
+                                                    <ArrowUpRight size={14} className="text-black" />
+                                                </div>
+
+                                                {/* Info */}
+                                                <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6">
+                                                    <span className="text-[9px] text-amber-400/60 uppercase tracking-[0.3em] block mb-1.5">
+                                                        {year}
+                                                    </span>
+                                                    <div className="flex items-end justify-between">
+                                                        <h3 className={`font-bold text-white leading-tight ${
+                                                            isLarge ? "text-xl md:text-2xl" : "text-base md:text-lg"
+                                                        }`}>
+                                                            {project?.data?.title as string ?? "Untitled"}
+                                                        </h3>
+                                                        <ArrowUpRight
+                                                            size={18}
+                                                            className="text-white/20 group-hover:text-amber-400 transition-colors duration-300 flex-shrink-0 ml-3"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </Link>
+                                    </motion.div>
+                                );
+                            })}
+                        </motion.div>
                     ) : (
-                        <EmptyState />
+                        /* Empty state */
+                        <motion.div
+                            key="empty"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="flex flex-col items-center justify-center py-32 text-center"
+                        >
+                            <p className="text-white/20 text-sm uppercase tracking-[0.3em] mb-3">
+                                No projects found
+                            </p>
+                            <p className="text-white/10 text-xs mb-8">
+                                {selectedCategory !== "all"
+                                    ? "Try a different category"
+                                    : "Check back soon"}
+                            </p>
+                            {selectedCategory !== "all" && (
+                                <button
+                                    onClick={() => handleCategory("all")}
+                                    className="px-6 py-2.5 border border-white/15 hover:border-white/40 text-white/40 hover:text-white text-xs uppercase tracking-[0.2em] rounded-full transition-all duration-300"
+                                >
+                                    View All
+                                </button>
+                            )}
+                        </motion.div>
                     )}
-                </>
-            )}
-        </div>
+                </AnimatePresence>
+
+                {/* Pagination */}
+                {totalPages > 1 && !isLoading && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.4 }}
+                        className="flex items-center justify-center gap-2 mt-16"
+                    >
+                        {/* Prev */}
+                        <button
+                            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                            disabled={currentPage === 1}
+                            className="px-4 py-2 text-[10px] uppercase tracking-[0.2em] border border-white/15 hover:border-white/40 text-white/40 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed rounded-full transition-all duration-300"
+                        >
+                            Prev
+                        </button>
+
+                        {/* Pages */}
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                            <button
+                                key={page}
+                                onClick={() => {
+                                    setCurrentPage(page);
+                                    window.scrollTo({ top: 0, behavior: "smooth" });
+                                }}
+                                className={`w-9 h-9 text-xs rounded-full border transition-all duration-300 ${
+                                    currentPage === page
+                                        ? "bg-amber-500 border-amber-500 text-black font-bold"
+                                        : "border-white/15 text-white/40 hover:border-white/40 hover:text-white"
+                                }`}
+                            >
+                                {page}
+                            </button>
+                        ))}
+
+                        {/* Next */}
+                        <button
+                            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                            disabled={currentPage === totalPages}
+                            className="px-4 py-2 text-[10px] uppercase tracking-[0.2em] border border-white/15 hover:border-white/40 text-white/40 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed rounded-full transition-all duration-300"
+                        >
+                            Next
+                        </button>
+                    </motion.div>
+                )}
+            </section>
+        </main>
     );
 }

@@ -9,6 +9,7 @@ import { Toaster } from "@/components/ui/sonner";
 import WhatsAppButton from "@/components/whatsapp-button";
 import MobileStickyBar from "@/components/mobile-sticky-bar";
 import ChatWidget from "@/components/chat-widget";
+import IntroAnimation from "@/components/intro-animation";
 const dancingScript = Dancing_Script({
     subsets: ["latin"],
     weight: ["400", "500", "600", "700"],
@@ -102,6 +103,7 @@ export default function RootLayout({
                 className={`${raleway.variable} ${dancingScript.variable} font-[family-name:var(--font-raleway)] bg-black text-white overflow-x-hidden antialiased`}
             >
                 <Provider>
+                    <IntroAnimation />
                     <Header />
                     <main className="min-h-screen">
                         {children}

@@ -50,7 +50,7 @@ export async function POST(request: Request) {
         }
 
         const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`,
             {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -70,8 +70,10 @@ export async function POST(request: Request) {
             }
         );
 
-        const data = await response.json();
-        const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+        const rawText = await response.text();
+console.log("Gemini raw response:", rawText);
+const data = JSON.parse(rawText);
+const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
         if (!text) {
             throw new Error("No response from Gemini");

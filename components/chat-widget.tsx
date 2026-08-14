@@ -91,7 +91,7 @@ export default function ChatWidget() {
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.8, y: 20 }}
                         transition={{ duration: 0.3 }}
-                        className="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-[190] flex flex-col items-end gap-3"
+                        className="fixed bottom-[72px] right-4 md:bottom-6 md:right-6 z-[190] flex flex-col items-end gap-3"
                     >
 
                         {/* Chat window */}

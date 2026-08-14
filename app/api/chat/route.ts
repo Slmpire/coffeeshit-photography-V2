@@ -50,28 +50,36 @@ export async function POST(request: Request) {
         }
 
         const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`,
-            {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    system_instruction: {
-                        parts: [{ text: SYSTEM_PROMPT }],
-                    },
-                    contents: messages.map((msg: any) => ({
-                        role: msg.role === "assistant" ? "model" : "user",
-                        parts: [{ text: msg.content }],
-                    })),
-                    generationConfig: {
-                        temperature: 0.7,
-                        maxOutputTokens: 500,
-                    },
-                }),
-            }
-        );
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${apiKey}`,
+    {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            contents: [
+                {
+                    role: "user",
+                    parts: [{ text: SYSTEM_PROMPT }],
+                },
+                {
+                    role: "model",
+                    parts: [{ text: "Understood. I am Coffee's assistant and will help clients with their photography enquiries." }],
+                },
+                ...messages.map((msg: any) => ({
+                    role: msg.role === "assistant" ? "model" : "user",
+                    parts: [{ text: msg.content }],
+                })),
+            ],
+            generationConfig: {
+                temperature: 0.7,
+                maxOutputTokens: 500,
+            },
+        }),
+    }
+);
 
         const rawText = await response.text();
 console.log("Gemini raw response:", rawText);
+console.log("Response status:", response.status);
 const data = JSON.parse(rawText);
 const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
 

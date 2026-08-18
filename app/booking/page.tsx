@@ -115,22 +115,23 @@ export default function BookingPage() {
     const selectedPackage = PACKAGES.find((p) => p.type === bookingType);
 
     const handleSubmit = async (data: any) => {
-        setIsSubmitting(true);
-        try {
-            const res = await fetch("/api/booking", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ ...data, bookingType }),
-            });
-            if (!res.ok) throw new Error();
-            setClientName(`${data.firstName} ${data.lastName}`.trim());
-            setStep("success");
-        } catch {
-            toast.error("Failed to submit. Message Coffee on WhatsApp instead.");
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
+    setIsSubmitting(true);
+    try {
+        const res = await fetch("/api/booking/initiate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ...data, bookingType }),
+        });
+        if (!res.ok) throw new Error();
+        const { authorization_url } = await res.json();
+        // Redirect to Paystack payment page
+        window.location.href = authorization_url;
+    } catch {
+        toast.error("Failed to initiate payment. Please message Coffee on WhatsApp.");
+    } finally {
+        setIsSubmitting(false);
+    }
+};
 
     return (
         <main className="w-full bg-black text-white min-h-screen">

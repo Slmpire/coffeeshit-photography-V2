@@ -5,8 +5,13 @@ import FAQClient from "./faq-client";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-    title: "FAQ",
-    description: "Frequently asked questions about CoffeeShotIt photography services.",
+    title: "About",
+    description: "Learn about Coffee — professional photographer and creative director based in Lagos, Nigeria.",
+    openGraph: {
+        title: "About Coffee | CoffeeShotIt",
+        description: "The person behind the lens — professional photographer based in Lagos, Nigeria.",
+        images: ["https://images.prismic.io/coffeeshotit/aFS4vnfc4bHWijt6_Coffee.jpg?auto=format,compress"],
+    },
 };
 
 export const revalidate = 60;

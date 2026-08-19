@@ -6,6 +6,11 @@ import { ArrowUpRight } from "lucide-react";
 export const metadata: Metadata = {
     title: "About",
     description: "Learn about Coffee — professional photographer and creative director based in Lagos, Nigeria.",
+    openGraph: {
+        title: "About Coffee | CoffeeShotIt",
+        description: "The person behind the lens — professional photographer based in Lagos, Nigeria.",
+        images: ["https://images.prismic.io/coffeeshotit/aFS4vnfc4bHWijt6_Coffee.jpg?auto=format,compress"],
+    },
 };
 
 const STATS = [

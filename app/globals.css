@@ -121,3 +121,15 @@
         font-size: clamp(2rem, 8vw, 4rem);
     }
 }
+/* Fix date/time picker icons on dark backgrounds */
+input[type="date"],
+input[type="time"] {
+    color-scheme: dark;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 0.6;
+    cursor: pointer;
+}

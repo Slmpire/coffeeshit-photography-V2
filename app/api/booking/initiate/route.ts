@@ -50,10 +50,11 @@ export async function POST(request: Request) {
         });
 
         const data = await response.json();
-
-        if (!data.status) {
-            throw new Error(data.message ?? "Paystack initialization failed");
-        }
+console.log("Paystack response:", JSON.stringify(data, null, 2));
+console.log("Secret key prefix:", process.env.PAYSTACK_SECRET_KEY?.substring(0, 10));
+if (!data.status) {
+    throw new Error(data.message ?? "Paystack initialization failed");
+}
 
         return NextResponse.json({
             authorization_url: data.data.authorization_url,

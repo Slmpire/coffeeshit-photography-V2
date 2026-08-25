@@ -133,3 +133,17 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     opacity: 0.6;
     cursor: pointer;
 }
+
+/* Date and time input text color */
+input[type="date"],
+input[type="time"] {
+    color: white;
+    color-scheme: dark;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 0.5;
+    cursor: pointer;
+}

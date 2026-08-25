@@ -122,28 +122,26 @@
     }
 }
 /* Fix date/time picker icons on dark backgrounds */
+
 input[type="date"],
 input[type="time"] {
     color-scheme: dark;
-}
-
-input[type="date"]::-webkit-calendar-picker-indicator,
-input[type="time"]::-webkit-calendar-picker-indicator {
-    filter: invert(1);
-    opacity: 0.6;
-    cursor: pointer;
-}
-
-/* Date and time input text color */
-input[type="date"],
-input[type="time"] {
     color: white;
-    color-scheme: dark;
 }
 
 input[type="date"]::-webkit-calendar-picker-indicator,
 input[type="time"]::-webkit-calendar-picker-indicator {
-    filter: invert(1);
-    opacity: 0.5;
+    filter: brightness(0) invert(1);
     cursor: pointer;
+    opacity: 0.6;
+}
+
+/* Native select dropdown fix */
+select option {
+    background-color: #0a0a0a;
+    color: white;
+}
+
+select {
+    color-scheme: dark;
 }

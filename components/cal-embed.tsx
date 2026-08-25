@@ -26,6 +26,16 @@ export default function CalEmbed({ calLink }: CalEmbedProps) {
                         "cal-text-emphasis": "#ffffff",
                         "cal-text-subtle": "rgba(255,255,255,0.4)",
                     },
+                    light: {
+                        "cal-brand": "#f59e0b",
+                        "cal-bg": "#0a0a0a",
+                        "cal-bg-emphasis": "#111111",
+                        "cal-border": "rgba(255,255,255,0.08)",
+                        "cal-border-emphasis": "rgba(255,255,255,0.15)",
+                        "cal-text": "#ffffff",
+                        "cal-text-emphasis": "#ffffff",
+                        "cal-text-subtle": "rgba(255,255,255,0.4)",
+                    },
                 },
             });
         })();

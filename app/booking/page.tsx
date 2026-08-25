@@ -8,6 +8,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 import Image from "next/image";
 import Link from "next/link";
+import DatePickerInput from "@/components/date-picker-input";
 import {
     ArrowLeft,
     ArrowUpRight,
@@ -445,7 +446,7 @@ export default function BookingPage() {
 
 // ── Form components ───────────────────────────────────────
 function WeddingForm({ onSubmit, isSubmitting }: { onSubmit: (d: WeddingData) => void; isSubmitting: boolean }) {
-    const { register, handleSubmit, formState: { errors } } = useForm<WeddingData>({ resolver: zodResolver(weddingSchema) });
+    const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<WeddingData>({ resolver: zodResolver(weddingSchema) });
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
             <Section title="Personal Details">
@@ -460,8 +461,14 @@ function WeddingForm({ onSubmit, isSubmitting }: { onSubmit: (d: WeddingData) =>
 
             <Section title="Wedding Details">
                 <Row>
-                    <Field label="Wedding Date" error={errors.weddingDate?.message}><input {...register("weddingDate")} type="date" className={inp(!!errors.weddingDate)} /></Field>
-                    <Field label="Reception Date (optional)"><input {...register("receptionDate")} type="date" className={inp()} /></Field>
+                   <Field label="Wedding Date" error={errors.weddingDate?.message}>
+    <DatePickerInput
+        value={watch("weddingDate")}
+        onChange={(val) => setValue("weddingDate", val)}
+        placeholder="Select wedding date"
+        hasError={!!errors.weddingDate}
+    />
+</Field>
                 </Row>
                 <Row>
                     <Field label="Wedding Location" error={errors.weddingLocation?.message}><input {...register("weddingLocation")} placeholder="Lagos, Nigeria" className={inp(!!errors.weddingLocation)} /></Field>
@@ -481,7 +488,7 @@ function WeddingForm({ onSubmit, isSubmitting }: { onSubmit: (d: WeddingData) =>
 }
 
 function EventForm({ onSubmit, isSubmitting }: { onSubmit: (d: EventData) => void; isSubmitting: boolean }) {
-    const { register, handleSubmit, control, formState: { errors } } = useForm<EventData>({ resolver: zodResolver(eventSchema) });
+    const { register, handleSubmit, watch, setValue, control, formState: { errors } } = useForm<EventData>({ resolver: zodResolver(eventSchema) });
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
             <Section title="Personal Details">
@@ -509,7 +516,14 @@ function EventForm({ onSubmit, isSubmitting }: { onSubmit: (d: EventData) => voi
                             </select>
                         )} />
                     </Field>
-                    <Field label="Event Date" error={errors.eventDate?.message}><input {...register("eventDate")} type="date" className={inp(!!errors.eventDate)} /></Field>
+                    <Field label="Event Date" error={errors.eventDate?.message}>
+    <DatePickerInput
+        value={watch("eventDate")}
+        onChange={(val) => setValue("eventDate", val)}
+        placeholder="Select event date"
+        hasError={!!errors.eventDate}
+    />
+</Field>
                 </Row>
                 <Row>
                     <Field label="Location" error={errors.eventLocation?.message}><input {...register("eventLocation")} placeholder="Lagos, Nigeria" className={inp(!!errors.eventLocation)} /></Field>
@@ -529,7 +543,7 @@ function EventForm({ onSubmit, isSubmitting }: { onSubmit: (d: EventData) => voi
 }
 
 function StudioForm({ onSubmit, isSubmitting }: { onSubmit: (d: StudioData) => void; isSubmitting: boolean }) {
-    const { register, handleSubmit, control, formState: { errors } } = useForm<StudioData>({ resolver: zodResolver(studioSchema) });
+    const { register, handleSubmit, watch, setValue, control, formState: { errors } } = useForm<StudioData>({ resolver: zodResolver(studioSchema) });;
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
             <Section title="Personal Details">
@@ -556,7 +570,14 @@ function StudioForm({ onSubmit, isSubmitting }: { onSubmit: (d: StudioData) => v
                             </select>
                         )} />
                     </Field>
-                    <Field label="Preferred Date" error={errors.sessionDate?.message}><input {...register("sessionDate")} type="date" className={inp(!!errors.sessionDate)} /></Field>
+                   <Field label="Preferred Date" error={errors.sessionDate?.message}>
+    <DatePickerInput
+        value={watch("sessionDate")}
+        onChange={(val) => setValue("sessionDate", val)}
+        placeholder="Select preferred date"
+        hasError={!!errors.sessionDate}
+    />
+</Field>
                 </Row>
                 <Field label="Tell Coffee about your session" error={errors.aboutSession?.message}><textarea {...register("aboutSession")} rows={4} placeholder="What's your vision? Any specific look or mood?" className={`${inp(!!errors.aboutSession)} resize-none`} /></Field>
             </Section>

@@ -43,6 +43,10 @@ export async function GET(request: Request) {
         const serviceName = BOOKING_LABELS[bookingData.bookingType] ?? "Photography Session";
 
         // Send emails via ZeptoMail
+        
+// Send emails via ZeptoMail (only if token is configured)
+if (process.env.ZEPTOMAIL_TOKEN) {
+    try {
         const client = new SendMailClient({
             url: "https://api.zeptomail.com/",
             token: `Zoho-enczapikey ${process.env.ZEPTOMAIL_TOKEN}`,
@@ -53,7 +57,6 @@ export async function GET(request: Request) {
             name: "CoffeeShotIt Media",
         };
 
-        // Email to client
         await client.sendMail({
             from,
             to: [{ email_address: { address: bookingData.email, name: customerName } }],
@@ -62,32 +65,18 @@ export async function GET(request: Request) {
                 <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0a0a0a;color:#fff;padding:32px;border-radius:12px;">
                     <h2 style="color:#f59e0b;margin-bottom:8px;">You're booked, ${bookingData.firstName}!</h2>
                     <p style="color:#888;margin-bottom:24px;">Your deposit has been received and your session is confirmed.</p>
-
                     <table style="width:100%;border-collapse:collapse;margin-bottom:24px;">
                         <tr><td style="padding:8px 0;color:#888;width:160px;">Service</td><td style="padding:8px 0;color:#f59e0b;font-weight:bold;">${serviceName}</td></tr>
                         <tr><td style="padding:8px 0;color:#888;">Deposit Paid</td><td style="padding:8px 0;color:#fff;">₦${amountPaid.toLocaleString()}</td></tr>
                         <tr><td style="padding:8px 0;color:#888;">Reference</td><td style="padding:8px 0;color:#fff;font-family:monospace;font-size:12px;">${reference}</td></tr>
                     </table>
-
-                    <div style="background:#1a1a1a;border-radius:8px;padding:16px;margin-bottom:24px;">
-                        <p style="color:#888;font-size:12px;margin:0 0 8px;">What happens next:</p>
-                        <p style="color:#fff;font-size:13px;margin:4px 0;">1. Coffee will reach out within 24 hours to confirm details</p>
-                        <p style="color:#fff;font-size:13px;margin:4px 0;">2. You'll receive a contract before your session</p>
-                        <p style="color:#fff;font-size:13px;margin:4px 0;">3. Balance due 7 days before your session</p>
-                    </div>
-
-                    <a href="https://wa.me/2348116273856" style="display:inline-block;padding:12px 24px;background:#25D366;color:#fff;text-decoration:none;border-radius:8px;font-weight:bold;margin-bottom:24px;">
+                    <a href="https://wa.me/2348116273856" style="display:inline-block;padding:12px 24px;background:#25D366;color:#fff;text-decoration:none;border-radius:8px;font-weight:bold;">
                         Message Coffee on WhatsApp
                     </a>
-
-                    <p style="color:#444;font-size:11px;margin-top:24px;border-top:1px solid #222;padding-top:16px;">
-                        CoffeeShotIt Media · Lagos, Nigeria · hello@coffeeshotit.com
-                    </p>
                 </div>
             `,
         });
 
-        // Email to Coffee (admin)
         await client.sendMail({
             from,
             to: [{ email_address: { address: process.env.ADMIN_EMAIL as string, name: "Coffee" } }],
@@ -95,7 +84,6 @@ export async function GET(request: Request) {
             htmlbody: `
                 <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0a0a0a;color:#fff;padding:32px;border-radius:12px;">
                     <h2 style="color:#f59e0b;margin-bottom:24px;">New Paid Booking 🎉</h2>
-
                     <table style="width:100%;border-collapse:collapse;">
                         <tr><td style="padding:8px 0;color:#888;width:160px;">Client</td><td style="padding:8px 0;color:#fff;">${customerName}</td></tr>
                         <tr><td style="padding:8px 0;color:#888;">Email</td><td style="padding:8px 0;color:#fff;">${bookingData.email}</td></tr>
@@ -103,24 +91,27 @@ export async function GET(request: Request) {
                         <tr><td style="padding:8px 0;color:#888;">Service</td><td style="padding:8px 0;color:#f59e0b;font-weight:bold;">${serviceName}</td></tr>
                         <tr><td style="padding:8px 0;color:#888;">Deposit</td><td style="padding:8px 0;color:#4ade80;font-weight:bold;">₦${amountPaid.toLocaleString()} PAID</td></tr>
                         <tr><td style="padding:8px 0;color:#888;">Reference</td><td style="padding:8px 0;color:#fff;font-family:monospace;font-size:12px;">${reference}</td></tr>
-                        ${bookingData.instagram ? `<tr><td style="padding:8px 0;color:#888;">Instagram</td><td style="padding:8px 0;color:#fff;">${bookingData.instagram}</td></tr>` : ""}
                     </table>
-
                     <a href="https://wa.me/${bookingData.phone?.replace(/\D/g, "")}" style="display:inline-block;margin-top:24px;padding:12px 24px;background:#25D366;color:#fff;text-decoration:none;border-radius:8px;font-weight:bold;">
                         Reply on WhatsApp
                     </a>
                 </div>
             `,
         });
+    } catch (emailError) {
+        console.error("Email sending failed:", emailError);
+        // Don't fail the whole verification if email fails
+    }
+}
 
-        return NextResponse.json({
-            verified: true,
-            customerName,
-            serviceName,
-            amountPaid,
-            reference,
-            email: bookingData.email,
-        });
+return NextResponse.json({
+    verified: true,
+    customerName,
+    serviceName,
+    amountPaid,
+    reference,
+    email: bookingData.email,
+});
     } catch (error) {
         console.error("Payment verification error:", error);
         return NextResponse.json(

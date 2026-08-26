@@ -51,7 +51,7 @@ export const metadata: Metadata = {
             "Weddings, events, portraits, proposals. Capture every moment with CoffeeShotIt.",
         images: [
             {
-                url: "https://images.prismic.io/coffeeshotit/aFS4vnfc4bHWijt6_Coffee.jpg?auto=format,compress",
+                url: "/opengraph-image",
                 width: 1200,
                 height: 630,
                 alt: "CoffeeShotIt Photography",
@@ -62,7 +62,7 @@ export const metadata: Metadata = {
         card: "summary_large_image",
         title: "CoffeeShotIt — Professional Photography in Nigeria",
         description: "Weddings, events, portraits, proposals. Book Coffee today.",
-        images: ["https://images.prismic.io/coffeeshotit/aFS4vnfc4bHWijt6_Coffee.jpg?auto=format,compress"],
+        images: ["/opengraph-image"],
         creator: "@coffeeshotit",
     },
     robots: {

@@ -10,7 +10,6 @@
         "slicemachine": "start-slicemachine"
     },
     "dependencies": {
-        "@calcom/embed-react": "^1.5.3",
         "@emotion/is-prop-valid": "latest",
         "@google/generative-ai": "^0.24.1",
         "@hookform/resolvers": "^5.2.2",

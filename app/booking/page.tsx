@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -23,7 +23,7 @@ import DatePickerInput from "@/components/date-picker-input";
 // ── Types ─────────────────────────────────────────────────
 type BookingType = "wedding" | "event" | "studio" | null;
 
-// ── Wedding packages ──────────────────────────────────────
+// ── Packages ──────────────────────────────────────────────
 const WEDDING_PACKAGES = [
     {
         id: "w1",
@@ -43,7 +43,7 @@ const WEDDING_PACKAGES = [
             "1 Photographer & 1 Videographer",
             "200 Digital Images & Online Gallery",
             "Cinematic Reels & Full Video on Drive",
-            "Complimentary Pre-Wedding (1 Outfit, 4 Edited Pictures & 45-sec Reel)",
+            "Complimentary Pre-Wedding (1 Outfit, 4 Pictures & 45-sec Reel)",
         ],
     },
     {
@@ -87,100 +87,50 @@ const WEDDING_PACKAGES = [
     },
 ];
 
-// ── Event packages ────────────────────────────────────────
 const EVENT_PACKAGES = [
     {
         id: "cs-basic",
         name: "CoffeeShoot Basic",
         price: 356250,
-        includes: [
-            "1 Photographer",
-            "Online Gallery",
-            "Flash Drive Containing All Pictures",
-        ],
+        includes: ["1 Photographer", "Online Gallery", "Flash Drive Containing All Pictures"],
     },
     {
         id: "cs-premium",
         name: "CoffeeShoot Premium",
         price: 581250,
-        includes: [
-            "2 Photographers",
-            "Online Gallery",
-            "Standard Photobook",
-            "Flash Drive Containing All Pictures",
-        ],
+        includes: ["2 Photographers", "Online Gallery", "Standard Photobook", "Flash Drive Containing All Pictures"],
     },
     {
         id: "day-basic",
         name: "Day's Event Basic",
         price: 750000,
-        includes: [
-            "1 Photographer & 1 Videographer",
-            "Online Gallery",
-            "Flash Drive Containing Photos & Videos",
-        ],
+        includes: ["1 Photographer & 1 Videographer", "Online Gallery", "Flash Drive Containing Photos & Videos"],
     },
     {
         id: "day-standard",
         name: "Day's Event Standard",
         price: 1000000,
-        includes: [
-            "1 Photographer & 1 Videographer",
-            "1 Photo Frame & 1 Photo Book",
-            "Flash Drive Containing Pictures & Video",
-        ],
+        includes: ["1 Photographer & 1 Videographer", "1 Photo Frame & 1 Photo Book", "Flash Drive Containing Pictures & Video"],
     },
     {
         id: "day-premium",
         name: "Day's Event Premium",
         price: 1037000,
-        includes: [
-            "2 Photographers & 2 Videographers",
-            "Flash Drive Containing Pictures & Video",
-        ],
+        includes: ["2 Photographers & 2 Videographers", "Flash Drive Containing Pictures & Video"],
     },
     {
         id: "day-luxury",
         name: "Day's Event Luxury",
         price: 1287500,
-        includes: [
-            "2 Photographers & 2 Videographers",
-            "2 Photo Frames & 1 Photo Book",
-            "Flash Drive Containing Pictures & Videos",
-        ],
+        includes: ["2 Photographers & 2 Videographers", "2 Photo Frames & 1 Photo Book", "Flash Drive Containing Pictures & Videos"],
     },
 ];
 
-// ── Studio packages ───────────────────────────────────────
 const STUDIO_PACKAGES = [
-    {
-        id: "studio-1",
-        name: "Studio Package One",
-        type: "studio",
-        price: 100000,
-        includes: ["4 edited pictures", "1–2 outfits", "1-hour session"],
-    },
-    {
-        id: "studio-2",
-        name: "Studio Package Two",
-        type: "studio",
-        price: 162500,
-        includes: ["7 edited pictures", "1–3 outfits", "1 hour 30 mins session"],
-    },
-    {
-        id: "outdoor-1",
-        name: "Outdoor Package One",
-        type: "outdoor",
-        price: 150000,
-        includes: ["5 edited pictures", "1–2 outfits", "1-hour session"],
-    },
-    {
-        id: "outdoor-2",
-        name: "Outdoor Package Two",
-        type: "outdoor",
-        price: 237500,
-        includes: ["12 edited pictures", "1–3 outfits", "2-hour session"],
-    },
+    { id: "studio-1", name: "Studio Package One", type: "studio", price: 100000, includes: ["4 edited pictures", "1–2 outfits", "1-hour session"] },
+    { id: "studio-2", name: "Studio Package Two", type: "studio", price: 162500, includes: ["7 edited pictures", "1–3 outfits", "1 hour 30 mins session"] },
+    { id: "outdoor-1", name: "Outdoor Package One", type: "outdoor", price: 150000, includes: ["5 edited pictures", "1–2 outfits", "1-hour session"] },
+    { id: "outdoor-2", name: "Outdoor Package Two", type: "outdoor", price: 237500, includes: ["12 edited pictures", "1–3 outfits", "2-hour session"] },
 ];
 
 const EXTRAS = [
@@ -190,20 +140,11 @@ const EXTRAS = [
 ];
 
 const CONTENT_PACKAGES = [
-    { id: "c1", name: "1 Reel", price: 150000, includes: ["1 Event", "1 Cinematic Reel"] },
-    { id: "c2", name: "Reels Package", price: 187500, includes: ["1 Event", "Multiple Reels"] },
-    { id: "c3", name: "3 Reels", price: 237500, includes: ["1 Event", "3 Cinematic Reels"] },
+    { id: "c1", name: "1 Reel", price: 150000 },
+    { id: "c2", name: "Reels Package", price: 187500 },
+    { id: "c3", name: "3 Reels", price: 237500 },
 ];
 
-// ── Styles ────────────────────────────────────────────────
-const inp = (err?: boolean) =>
-    `w-full bg-white/[0.04] border ${
-        err ? "border-red-500/50 focus:border-red-400/50" : "border-white/8 focus:border-amber-400/50"
-    } rounded-xl px-4 py-3.5 text-white text-sm placeholder-white/20 focus:outline-none transition-colors duration-200`;
-
-const lbl = "block text-[10px] text-white/30 uppercase tracking-[0.3em] mb-2";
-
-// ── Main packages for step 1 ──────────────────────────────
 const MAIN_PACKAGES = [
     {
         type: "wedding" as BookingType,
@@ -226,20 +167,16 @@ const MAIN_PACKAGES = [
         icon: Camera,
         title: "Studio & Outdoor",
         subtitle: "From ₦100,000",
-        desc: "Studio portraits or outdoor sessions with content creation add-ons.",
+        desc: "Studio portraits or outdoor sessions with optional content creation add-ons.",
         image: "https://images.prismic.io/coffeeshotit/aFS4vnfc4bHWijt6_Coffee.jpg?auto=format,compress",
     },
 ];
 
-// ── Deposit = 20% of package price ───────────────────────
-const calcDeposit = (price: number) => Math.round(price * 0.2);
+// ── Helpers ───────────────────────────────────────────────
+const fmt = (n: number) => `₦${n.toLocaleString()}`;
 
-function formatNaira(amount: number) {
-    return `₦${amount.toLocaleString()}`;
-}
-
-// ── Base schema ───────────────────────────────────────────
-const baseSchema = z.object({
+// ── Schema ────────────────────────────────────────────────
+const schema = z.object({
     firstName: z.string().min(1, "Required"),
     lastName: z.string().min(1, "Required"),
     email: z.string().email("Enter a valid email"),
@@ -248,6 +185,61 @@ const baseSchema = z.object({
     message: z.string().optional(),
 });
 
+// ── Shared input styles ───────────────────────────────────
+const inp = (err?: boolean) =>
+    `w-full bg-white/[0.04] border ${
+        err ? "border-red-500/50" : "border-white/8 focus:border-amber-400/50"
+    } rounded-xl px-4 py-3.5 text-white text-sm placeholder-white/20 focus:outline-none transition-colors duration-200`;
+
+const lbl = "block text-[10px] text-white/30 uppercase tracking-[0.3em] mb-2";
+
+// ── Package card ──────────────────────────────────────────
+function PkgCard({
+    selected,
+    onClick,
+    name,
+    price,
+    includes,
+}: {
+    selected: boolean;
+    onClick: () => void;
+    name: string;
+    price: string;
+    includes: string[];
+}) {
+    return (
+        <button
+            type="button"
+            onClick={onClick}
+            className={`text-left p-4 rounded-xl border transition-all duration-200 ${
+                selected
+                    ? "bg-amber-500/10 border-amber-500/40"
+                    : "bg-white/[0.02] border-white/8 hover:bg-white/[0.04]"
+            }`}
+        >
+            <div className="flex items-start justify-between mb-2">
+                <div>
+                    <p className="text-sm font-semibold text-white">{name}</p>
+                    <p className="text-xs text-amber-400 font-bold mt-0.5">{price}</p>
+                </div>
+                {selected && (
+                    <div className="w-5 h-5 rounded-full bg-amber-500 flex items-center justify-center flex-shrink-0">
+                        <Check size={10} className="text-black" />
+                    </div>
+                )}
+            </div>
+            <div className="flex flex-col gap-1">
+                {includes.map((item) => (
+                    <div key={item} className="flex items-start gap-1.5">
+                        <div className="w-1 h-1 rounded-full bg-amber-400/40 flex-shrink-0 mt-1.5" />
+                        <span className="text-[10px] text-white/30 leading-relaxed">{item}</span>
+                    </div>
+                ))}
+            </div>
+        </button>
+    );
+}
+
 // ── Main ──────────────────────────────────────────────────
 export default function BookingPage() {
     const [bookingType, setBookingType] = useState<BookingType>(null);
@@ -255,108 +247,82 @@ export default function BookingPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [clientName, setClientName] = useState("");
 
-    // Wedding state
+    // Wedding
     const [selectedWeddingPkg, setSelectedWeddingPkg] = useState<string | null>(null);
     const [weddingEvents, setWeddingEvents] = useState<"one" | "two">("one");
     const [weddingDate, setWeddingDate] = useState("");
 
-    // Event state
+    // Event
     const [selectedEventPkg, setSelectedEventPkg] = useState<string | null>(null);
+    const [includeContent, setIncludeContent] = useState<string | null>(null);
     const [eventDate, setEventDate] = useState("");
 
-    // Studio state
+    // Studio
     const [selectedStudioPkg, setSelectedStudioPkg] = useState<string | null>(null);
     const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
     const [sessionDate, setSessionDate] = useState("");
-    const [includeContent, setIncludeContent] = useState<string | null>(null);
 
-    const { register, handleSubmit, formState: { errors }, reset } = useForm({
-        resolver: zodResolver(baseSchema),
+    const { register, handleSubmit, formState: { errors } } = useForm({
+        resolver: zodResolver(schema),
     });
 
-    // Calculate total price
-    const getTotal = () => {
+    // Total price
+    const total = (() => {
         if (bookingType === "wedding" && selectedWeddingPkg) {
             const pkg = WEDDING_PACKAGES.find(p => p.id === selectedWeddingPkg);
-            return pkg ? pkg.prices[weddingEvents] : 0;
+            return pkg?.prices[weddingEvents] ?? 0;
         }
         if (bookingType === "event" && selectedEventPkg) {
             const pkg = EVENT_PACKAGES.find(p => p.id === selectedEventPkg);
-            let total = pkg?.price ?? 0;
-            if (includeContent) {
-                const contentPkg = CONTENT_PACKAGES.find(p => p.id === includeContent);
-                total += contentPkg?.price ?? 0;
-            }
-            return total;
+            let t = pkg?.price ?? 0;
+            if (includeContent) t += CONTENT_PACKAGES.find(p => p.id === includeContent)?.price ?? 0;
+            return t;
         }
         if (bookingType === "studio" && selectedStudioPkg) {
             const pkg = STUDIO_PACKAGES.find(p => p.id === selectedStudioPkg);
-            let total = pkg?.price ?? 0;
-            selectedExtras.forEach(extraId => {
-                const extra = EXTRAS.find(e => e.id === extraId);
-                total += extra?.price ?? 0;
-            });
-            return total;
+            let t = pkg?.price ?? 0;
+            selectedExtras.forEach(id => { t += EXTRAS.find(e => e.id === id)?.price ?? 0; });
+            return t;
         }
         return 0;
-    };
-
-    const total = getTotal();
-    const deposit = calcDeposit(total);
-
-    const handleSubmitForm = async (data: any) => {
-    if (!selectedWeddingPkg && bookingType === "wedding") {
-        toast.error("Please select a wedding package");
-        return;
-    }
-    if (!selectedEventPkg && bookingType === "event") {
-        toast.error("Please select an event package");
-        return;
-    }
-    if (!selectedStudioPkg && bookingType === "studio") {
-        toast.error("Please select a session package");
-        return;
-    }
-
-    setIsSubmitting(true);
-    try {
-        const bookingDetails = {
-            ...data,
-            bookingType,
-            weddingPackage: selectedWeddingPkg,
-            weddingEvents,
-            weddingDate,
-            eventPackage: selectedEventPkg,
-            eventDate,
-            studioPackage: selectedStudioPkg,
-            sessionDate,
-            extras: selectedExtras,
-            contentPackage: includeContent,
-            totalPrice: total,
-        };
-
-        const res = await fetch("/api/booking", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(bookingDetails),
-        });
-        if (!res.ok) throw new Error();
-        setStep("success");
-        setClientName(`${data.firstName} ${data.lastName}`.trim());
-    } catch {
-        toast.error("Something went wrong. Please message Coffee on WhatsApp.");
-    } finally {
-        setIsSubmitting(false);
-    }
-};
-
-    const selectedPkg = bookingType === "wedding"
-        ? WEDDING_PACKAGES.find(p => p.id === selectedWeddingPkg)
-        : bookingType === "event"
-        ? EVENT_PACKAGES.find(p => p.id === selectedEventPkg)
-        : STUDIO_PACKAGES.find(p => p.id === selectedStudioPkg);
+    })();
 
     const mainPkg = MAIN_PACKAGES.find(p => p.type === bookingType);
+
+    const onSubmit = async (data: any) => {
+        if (bookingType === "wedding" && !selectedWeddingPkg) return toast.error("Please select a wedding package");
+        if (bookingType === "event" && !selectedEventPkg) return toast.error("Please select an event package");
+        if (bookingType === "studio" && !selectedStudioPkg) return toast.error("Please select a session package");
+
+        setIsSubmitting(true);
+        try {
+            const res = await fetch("/api/booking", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    ...data,
+                    bookingType,
+                    weddingPackage: selectedWeddingPkg,
+                    weddingEvents,
+                    weddingDate,
+                    eventPackage: selectedEventPkg,
+                    eventDate,
+                    studioPackage: selectedStudioPkg,
+                    sessionDate,
+                    extras: selectedExtras,
+                    contentPackage: includeContent,
+                    totalPrice: total,
+                }),
+            });
+            if (!res.ok) throw new Error();
+            setClientName(`${data.firstName} ${data.lastName}`.trim());
+            setStep("success");
+        } catch {
+            toast.error("Something went wrong. Please message Coffee on WhatsApp.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     return (
         <main className="w-full bg-black text-white min-h-screen">
@@ -364,20 +330,12 @@ export default function BookingPage() {
 
                 {/* ── Step 1: Select category ── */}
                 {step === "select" && (
-                    <motion.div
-                        key="select"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="min-h-screen"
-                    >
-                        <section className="pt-32 pb-16 px-4 sm:px-6 lg:px-8">
+                    <motion.div key="select" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="min-h-screen">
+                        <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
                             <div className="max-w-7xl mx-auto">
                                 <div className="flex items-center gap-3 mb-8">
                                     <div className="h-px w-10 bg-amber-400/60" />
-                                    <span className="text-[10px] text-amber-400 uppercase tracking-[0.5em]">
-                                        Book a Session
-                                    </span>
+                                    <span className="text-[10px] text-amber-400 uppercase tracking-[0.5em]">Book a Session</span>
                                 </div>
                                 <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold leading-[0.9] tracking-tight mb-6">
                                     Reserve your
@@ -387,7 +345,7 @@ export default function BookingPage() {
                                     with Coffee.
                                 </h1>
                                 <p className="text-white/30 text-sm max-w-md leading-relaxed mb-12">
-                                    Choose your session type. You'll select the exact package and add-ons on the next step.
+                                    Choose your session type. You'll pick the exact package on the next step. No payment needed now — Coffee will be in touch to confirm.
                                 </p>
 
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
@@ -402,10 +360,8 @@ export default function BookingPage() {
                                             <Image src={image} alt={title} fill className="object-cover transition-transform duration-700 group-hover:scale-105" sizes="(max-width: 768px) 100vw, 33vw" />
                                             <div className="absolute inset-0 bg-black/50 group-hover:bg-black/40 transition-colors duration-500" />
                                             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
-                                            <div className="absolute top-5 left-5">
-                                                <div className="w-9 h-9 rounded-xl bg-black/40 backdrop-blur-sm border border-white/10 flex items-center justify-center">
-                                                    <Icon size={16} className="text-amber-400" />
-                                                </div>
+                                            <div className="absolute top-5 left-5 w-9 h-9 rounded-xl bg-black/40 backdrop-blur-sm border border-white/10 flex items-center justify-center">
+                                                <Icon size={16} className="text-amber-400" />
                                             </div>
                                             <div className="absolute top-5 right-5 w-9 h-9 rounded-full bg-amber-500 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
                                                 <ArrowUpRight size={14} className="text-black" />
@@ -419,9 +375,14 @@ export default function BookingPage() {
                                     ))}
                                 </div>
 
-                                <div className="flex items-center gap-4">
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pt-6 border-t border-white/5">
                                     <p className="text-white/20 text-sm">Not sure which to pick?</p>
-                                    <a href="https://wa.me/2348116273856?text=Hi%20Coffee%2C%20I%27d%20like%20to%20inquire%20about%20a%20photography%20session" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-[#25D366] hover:text-green-400 transition-colors">
+                                    
+                                      <a  href="https://wa.me/2348116273856?text=Hi%20Coffee%2C%20I%27d%20like%20to%20inquire%20about%20a%20photography%20session"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-2 text-sm text-[#25D366] hover:text-green-400 transition-colors"
+                                    >
                                         <MessageCircle size={16} />
                                         Chat with Coffee on WhatsApp
                                     </a>
@@ -433,45 +394,47 @@ export default function BookingPage() {
 
                 {/* ── Step 2: Form ── */}
                 {step === "form" && (
-                    <motion.div
-                        key="form"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="min-h-screen lg:grid lg:grid-cols-[1fr_1.3fr]"
-                    >
-                        {/* Left panel */}
+                    <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="min-h-screen lg:grid lg:grid-cols-[1fr_1.3fr]">
+
+                        {/* Left sticky panel */}
                         <div className="relative hidden lg:block">
                             <div className="sticky top-0 h-screen overflow-hidden">
                                 <Image src={mainPkg?.image ?? ""} alt={mainPkg?.title ?? ""} fill className="object-cover" sizes="40vw" />
-                                <div className="absolute inset-0 bg-black/60" />
+                                <div className="absolute inset-0 bg-black/65" />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
                                 <div className="absolute inset-0 flex flex-col justify-between p-10">
-                                    <button onClick={() => setStep("select")} className="flex items-center gap-2 text-white/40 hover:text-white text-xs uppercase tracking-[0.2em] transition-colors w-fit">
-                                        <ArrowLeft size={14} />Back
+                                    <button
+                                        onClick={() => setStep("select")}
+                                        className="flex items-center gap-2 text-white/40 hover:text-white text-xs uppercase tracking-[0.2em] transition-colors w-fit"
+                                    >
+                                        <ArrowLeft size={14} />
+                                        Back
                                     </button>
                                     <div>
+                                        <p className="text-[10px] text-amber-400/50 uppercase tracking-[0.4em] mb-2">{mainPkg?.subtitle}</p>
                                         <h2 className="text-2xl font-bold text-white mb-2">{mainPkg?.title}</h2>
-                                        <p className="text-white/40 text-sm mb-6">{mainPkg?.desc}</p>
+                                        <p className="text-white/40 text-sm mb-8 leading-relaxed">{mainPkg?.desc}</p>
 
-                                        {/* Price summary */}
+                                        {/* Live price summary */}
                                         {total > 0 && (
-                                            <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-4">
-                                                <p className="text-[9px] text-white/30 uppercase tracking-[0.3em] mb-3">Price Summary</p>
-                                                <div className="flex justify-between mb-2">
-                                                    <span className="text-xs text-white/50">Package Total</span>
-                                                    <span className="text-xs text-white font-semibold">{formatNaira(total)}</span>
+                                            <div className="bg-black/40 backdrop-blur-sm border border-white/10 rounded-xl p-4 mb-6">
+                                                <p className="text-[9px] text-white/30 uppercase tracking-[0.3em] mb-3">Your Selection</p>
+                                                <div className="flex justify-between">
+                                                    <span className="text-xs text-white/50">Total</span>
+                                                    <span className="text-sm text-white font-bold">{fmt(total)}</span>
                                                 </div>
-                                                <div className="flex justify-between pt-2 border-t border-white/10">
-                                                    <span className="text-xs text-amber-400">Deposit (20%)</span>
-                                                    <span className="text-xs text-amber-400 font-bold">{formatNaira(deposit)}</span>
-                                                </div>
-                                                <p className="text-[9px] text-white/20 mt-2">Balance due 7 days before session</p>
+                                                <p className="text-[9px] text-white/20 mt-2">
+                                                    No payment now — Coffee will confirm and arrange payment directly.
+                                                </p>
                                             </div>
                                         )}
 
-                                        {/* WhatsApp fallback */}
-                                        <a href="https://wa.me/2348116273856?text=Hi%20Coffee%2C%20I%27d%20like%20to%20book%20a%20session" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-xs text-[#25D366] hover:text-green-400 transition-colors">
+                                        
+                                          <a  href="https://wa.me/2348116273856?text=Hi%20Coffee%2C%20I%27d%20like%20to%20book%20a%20session"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex items-center gap-2 text-xs text-[#25D366] hover:text-green-400 transition-colors"
+                                        >
                                             <MessageCircle size={12} />
                                             Prefer to book via WhatsApp?
                                         </a>
@@ -480,27 +443,33 @@ export default function BookingPage() {
                             </div>
                         </div>
 
-                        {/* Right — form */}
+                        {/* Right scrollable form */}
                         <div className="px-4 sm:px-8 lg:px-12 pt-28 lg:pt-16 pb-24">
-                            <button onClick={() => setStep("select")} className="flex lg:hidden items-center gap-2 text-white/40 hover:text-white text-xs uppercase tracking-[0.2em] transition-colors mb-8">
-                                <ArrowLeft size={14} />Back
+                            <button
+                                onClick={() => setStep("select")}
+                                className="flex lg:hidden items-center gap-2 text-white/40 hover:text-white text-xs uppercase tracking-[0.2em] transition-colors mb-8"
+                            >
+                                <ArrowLeft size={14} />
+                                Back
                             </button>
 
                             <div className="max-w-xl">
                                 <h2 className="text-2xl font-bold text-white mb-1">Fill in your details</h2>
-                                <p className="text-white/30 text-sm mb-10">Select your package then complete the form. 20% deposit required to confirm.</p>
+                                <p className="text-white/30 text-sm mb-10">
+                                    Select your package and complete the form. Coffee will be in touch within 24 hours.
+                                </p>
 
-                                <form onSubmit={handleSubmit(handleSubmitForm)} className="flex flex-col gap-8">
+                                <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-8">
 
-                                    {/* ── Wedding packages ── */}
+                                    {/* ── Wedding ── */}
                                     {bookingType === "wedding" && (
                                         <div className="flex flex-col gap-4">
                                             <p className="text-[10px] text-amber-400/60 uppercase tracking-[0.4em] pb-2 border-b border-white/5">
                                                 Select Wedding Package
                                             </p>
 
-                                            {/* Events selector */}
-                                            <div className="flex gap-2 mb-2">
+                                            {/* 1 or 2 events */}
+                                            <div className="flex gap-2">
                                                 {(["one", "two"] as const).map((e) => (
                                                     <button
                                                         key={e}
@@ -509,7 +478,7 @@ export default function BookingPage() {
                                                         className={`px-4 py-2 text-xs rounded-full border transition-all duration-200 ${
                                                             weddingEvents === e
                                                                 ? "bg-amber-500 border-amber-500 text-black font-bold"
-                                                                : "border-white/15 text-white/40 hover:border-white/40"
+                                                                : "border-white/15 text-white/40 hover:border-white/40 hover:text-white"
                                                         }`}
                                                     >
                                                         {e === "one" ? "1 Event" : "2 Events"}
@@ -518,53 +487,24 @@ export default function BookingPage() {
                                             </div>
 
                                             {WEDDING_PACKAGES.map((pkg) => (
-                                                <button
+                                                <PkgCard
                                                     key={pkg.id}
-                                                    type="button"
+                                                    selected={selectedWeddingPkg === pkg.id}
                                                     onClick={() => setSelectedWeddingPkg(pkg.id)}
-                                                    className={`text-left p-4 rounded-xl border transition-all duration-200 ${
-                                                        selectedWeddingPkg === pkg.id
-                                                            ? "bg-amber-500/10 border-amber-500/40"
-                                                            : "bg-white/[0.02] border-white/8 hover:bg-white/[0.04]"
-                                                    }`}
-                                                >
-                                                    <div className="flex items-start justify-between mb-2">
-                                                        <div>
-                                                            <p className="text-sm font-semibold text-white">{pkg.name}</p>
-                                                            <p className="text-xs text-amber-400 font-bold mt-0.5">
-                                                                {formatNaira(pkg.prices[weddingEvents])}
-                                                            </p>
-                                                        </div>
-                                                        {selectedWeddingPkg === pkg.id && (
-                                                            <div className="w-5 h-5 rounded-full bg-amber-500 flex items-center justify-center flex-shrink-0">
-                                                                <Check size={10} className="text-black" />
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    <div className="flex flex-col gap-1">
-                                                        {pkg.includes.map((item) => (
-                                                            <div key={item} className="flex items-start gap-1.5">
-                                                                <div className="w-1 h-1 rounded-full bg-amber-400/40 flex-shrink-0 mt-1.5" />
-                                                                <span className="text-[10px] text-white/30 leading-relaxed">{item}</span>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </button>
+                                                    name={pkg.name}
+                                                    price={fmt(pkg.prices[weddingEvents])}
+                                                    includes={pkg.includes}
+                                                />
                                             ))}
 
-                                            {/* Wedding date */}
-                                            <div className="flex flex-col gap-1.5 mt-2">
+                                            <div className="flex flex-col gap-1.5">
                                                 <label className={lbl}>Wedding Date</label>
-                                                <DatePickerInput
-                                                    value={weddingDate}
-                                                    onChange={setWeddingDate}
-                                                    placeholder="Select wedding date"
-                                                />
+                                                <DatePickerInput value={weddingDate} onChange={setWeddingDate} placeholder="Select wedding date" />
                                             </div>
                                         </div>
                                     )}
 
-                                    {/* ── Event packages ── */}
+                                    {/* ── Event ── */}
                                     {bookingType === "event" && (
                                         <div className="flex flex-col gap-4">
                                             <p className="text-[10px] text-amber-400/60 uppercase tracking-[0.4em] pb-2 border-b border-white/5">
@@ -572,36 +512,14 @@ export default function BookingPage() {
                                             </p>
 
                                             {EVENT_PACKAGES.map((pkg) => (
-                                                <button
+                                                <PkgCard
                                                     key={pkg.id}
-                                                    type="button"
+                                                    selected={selectedEventPkg === pkg.id}
                                                     onClick={() => setSelectedEventPkg(pkg.id)}
-                                                    className={`text-left p-4 rounded-xl border transition-all duration-200 ${
-                                                        selectedEventPkg === pkg.id
-                                                            ? "bg-amber-500/10 border-amber-500/40"
-                                                            : "bg-white/[0.02] border-white/8 hover:bg-white/[0.04]"
-                                                    }`}
-                                                >
-                                                    <div className="flex items-start justify-between mb-2">
-                                                        <div>
-                                                            <p className="text-sm font-semibold text-white">{pkg.name}</p>
-                                                            <p className="text-xs text-amber-400 font-bold mt-0.5">{formatNaira(pkg.price)}</p>
-                                                        </div>
-                                                        {selectedEventPkg === pkg.id && (
-                                                            <div className="w-5 h-5 rounded-full bg-amber-500 flex items-center justify-center flex-shrink-0">
-                                                                <Check size={10} className="text-black" />
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    <div className="flex flex-col gap-1">
-                                                        {pkg.includes.map((item) => (
-                                                            <div key={item} className="flex items-start gap-1.5">
-                                                                <div className="w-1 h-1 rounded-full bg-amber-400/40 flex-shrink-0 mt-1.5" />
-                                                                <span className="text-[10px] text-white/30">{item}</span>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </button>
+                                                    name={pkg.name}
+                                                    price={fmt(pkg.price)}
+                                                    includes={pkg.includes}
+                                                />
                                             ))}
 
                                             {/* Content creation add-on */}
@@ -622,99 +540,48 @@ export default function BookingPage() {
                                                             }`}
                                                         >
                                                             <p className="text-[10px] font-semibold text-white mb-1">{pkg.name}</p>
-                                                            <p className="text-[10px] text-amber-400 font-bold">{formatNaira(pkg.price)}</p>
+                                                            <p className="text-[10px] text-amber-400 font-bold">{fmt(pkg.price)}</p>
                                                         </button>
                                                     ))}
                                                 </div>
                                             </div>
 
-                                            {/* Event date */}
                                             <div className="flex flex-col gap-1.5">
                                                 <label className={lbl}>Event Date</label>
-                                                <DatePickerInput
-                                                    value={eventDate}
-                                                    onChange={setEventDate}
-                                                    placeholder="Select event date"
-                                                />
+                                                <DatePickerInput value={eventDate} onChange={setEventDate} placeholder="Select event date" />
                                             </div>
                                         </div>
                                     )}
 
-                                    {/* ── Studio packages ── */}
+                                    {/* ── Studio & Outdoor ── */}
                                     {bookingType === "studio" && (
                                         <div className="flex flex-col gap-4">
                                             <p className="text-[10px] text-amber-400/60 uppercase tracking-[0.4em] pb-2 border-b border-white/5">
                                                 Select Session Package
                                             </p>
 
-                                            {/* Studio */}
                                             <p className="text-[10px] text-white/20 uppercase tracking-[0.2em]">Studio Sessions</p>
                                             {STUDIO_PACKAGES.filter(p => p.type === "studio").map((pkg) => (
-                                                <button
+                                                <PkgCard
                                                     key={pkg.id}
-                                                    type="button"
+                                                    selected={selectedStudioPkg === pkg.id}
                                                     onClick={() => setSelectedStudioPkg(pkg.id)}
-                                                    className={`text-left p-4 rounded-xl border transition-all duration-200 ${
-                                                        selectedStudioPkg === pkg.id
-                                                            ? "bg-amber-500/10 border-amber-500/40"
-                                                            : "bg-white/[0.02] border-white/8 hover:bg-white/[0.04]"
-                                                    }`}
-                                                >
-                                                    <div className="flex items-start justify-between mb-2">
-                                                        <div>
-                                                            <p className="text-sm font-semibold text-white">{pkg.name}</p>
-                                                            <p className="text-xs text-amber-400 font-bold mt-0.5">{formatNaira(pkg.price)}</p>
-                                                        </div>
-                                                        {selectedStudioPkg === pkg.id && (
-                                                            <div className="w-5 h-5 rounded-full bg-amber-500 flex items-center justify-center flex-shrink-0">
-                                                                <Check size={10} className="text-black" />
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    <div className="flex flex-col gap-1">
-                                                        {pkg.includes.map((item) => (
-                                                            <div key={item} className="flex items-start gap-1.5">
-                                                                <div className="w-1 h-1 rounded-full bg-amber-400/40 flex-shrink-0 mt-1.5" />
-                                                                <span className="text-[10px] text-white/30">{item}</span>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </button>
+                                                    name={pkg.name}
+                                                    price={fmt(pkg.price)}
+                                                    includes={pkg.includes}
+                                                />
                                             ))}
 
-                                            {/* Outdoor */}
                                             <p className="text-[10px] text-white/20 uppercase tracking-[0.2em] mt-2">Outdoor Sessions</p>
                                             {STUDIO_PACKAGES.filter(p => p.type === "outdoor").map((pkg) => (
-                                                <button
+                                                <PkgCard
                                                     key={pkg.id}
-                                                    type="button"
+                                                    selected={selectedStudioPkg === pkg.id}
                                                     onClick={() => setSelectedStudioPkg(pkg.id)}
-                                                    className={`text-left p-4 rounded-xl border transition-all duration-200 ${
-                                                        selectedStudioPkg === pkg.id
-                                                            ? "bg-amber-500/10 border-amber-500/40"
-                                                            : "bg-white/[0.02] border-white/8 hover:bg-white/[0.04]"
-                                                    }`}
-                                                >
-                                                    <div className="flex items-start justify-between mb-2">
-                                                        <div>
-                                                            <p className="text-sm font-semibold text-white">{pkg.name}</p>
-                                                            <p className="text-xs text-amber-400 font-bold mt-0.5">{formatNaira(pkg.price)}</p>
-                                                        </div>
-                                                        {selectedStudioPkg === pkg.id && (
-                                                            <div className="w-5 h-5 rounded-full bg-amber-500 flex items-center justify-center flex-shrink-0">
-                                                                <Check size={10} className="text-black" />
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    <div className="flex flex-col gap-1">
-                                                        {pkg.includes.map((item) => (
-                                                            <div key={item} className="flex items-start gap-1.5">
-                                                                <div className="w-1 h-1 rounded-full bg-amber-400/40 flex-shrink-0 mt-1.5" />
-                                                                <span className="text-[10px] text-white/30">{item}</span>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </button>
+                                                    name={pkg.name}
+                                                    price={fmt(pkg.price)}
+                                                    includes={pkg.includes}
+                                                />
                                             ))}
 
                                             {/* Extras */}
@@ -725,11 +592,13 @@ export default function BookingPage() {
                                                         <button
                                                             key={extra.id}
                                                             type="button"
-                                                            onClick={() => setSelectedExtras(prev =>
-                                                                prev.includes(extra.id)
-                                                                    ? prev.filter(e => e !== extra.id)
-                                                                    : [...prev, extra.id]
-                                                            )}
+                                                            onClick={() =>
+                                                                setSelectedExtras(prev =>
+                                                                    prev.includes(extra.id)
+                                                                        ? prev.filter(e => e !== extra.id)
+                                                                        : [...prev, extra.id]
+                                                                )
+                                                            }
                                                             className={`flex items-center justify-between p-3 rounded-xl border transition-all duration-200 ${
                                                                 selectedExtras.includes(extra.id)
                                                                     ? "bg-amber-500/10 border-amber-500/40"
@@ -738,26 +607,21 @@ export default function BookingPage() {
                                                         >
                                                             <div className="flex items-center gap-2">
                                                                 {selectedExtras.includes(extra.id) && (
-                                                                    <div className="w-4 h-4 rounded-full bg-amber-500 flex items-center justify-center flex-shrink-0">
+                                                                    <div className="w-4 h-4 rounded-full bg-amber-500 flex items-center justify-center">
                                                                         <Check size={8} className="text-black" />
                                                                     </div>
                                                                 )}
                                                                 <span className="text-xs text-white/60">{extra.label}</span>
                                                             </div>
-                                                            <span className="text-xs text-amber-400 font-bold">{formatNaira(extra.price)}</span>
+                                                            <span className="text-xs text-amber-400 font-bold">{fmt(extra.price)}</span>
                                                         </button>
                                                     ))}
                                                 </div>
                                             </div>
 
-                                            {/* Session date */}
                                             <div className="flex flex-col gap-1.5">
                                                 <label className={lbl}>Preferred Date</label>
-                                                <DatePickerInput
-                                                    value={sessionDate}
-                                                    onChange={setSessionDate}
-                                                    placeholder="Select preferred date"
-                                                />
+                                                <DatePickerInput value={sessionDate} onChange={setSessionDate} placeholder="Select preferred date" />
                                             </div>
                                         </div>
                                     )}
@@ -795,26 +659,29 @@ export default function BookingPage() {
                                         </div>
                                         <div className="flex flex-col gap-1.5">
                                             <label className={lbl}>Additional Notes (optional)</label>
-                                            <textarea {...register("message")} rows={3} placeholder="Any specific requests, questions, or details Coffee should know..." className={`${inp()} resize-none`} />
+                                            <textarea
+                                                {...register("message")}
+                                                rows={3}
+                                                placeholder="Any specific requests or details Coffee should know..."
+                                                className={`${inp()} resize-none`}
+                                            />
                                         </div>
                                     </div>
 
-                                    {/* ── Price summary (mobile) ── */}
+                                    {/* Mobile price summary */}
                                     {total > 0 && (
                                         <div className="lg:hidden bg-white/[0.03] border border-white/8 rounded-xl p-4">
-                                            <p className="text-[9px] text-white/30 uppercase tracking-[0.3em] mb-3">Price Summary</p>
-                                            <div className="flex justify-between mb-2">
-                                                <span className="text-xs text-white/50">Package Total</span>
-                                                <span className="text-xs text-white font-semibold">{formatNaira(total)}</span>
+                                            <div className="flex justify-between">
+                                                <span className="text-xs text-white/40">Estimated Total</span>
+                                                <span className="text-sm text-white font-bold">{fmt(total)}</span>
                                             </div>
-                                            <div className="flex justify-between pt-2 border-t border-white/10">
-                                                <span className="text-xs text-amber-400">Deposit Due Now (20%)</span>
-                                                <span className="text-xs text-amber-400 font-bold">{formatNaira(deposit)}</span>
-                                            </div>
+                                            <p className="text-[9px] text-white/20 mt-1">
+                                                No payment now — Coffee will confirm and arrange payment.
+                                            </p>
                                         </div>
                                     )}
 
-                                    {/* ── Submit ── */}
+                                    {/* Submit */}
                                     <motion.button
                                         type="submit"
                                         disabled={isSubmitting || total === 0}
@@ -827,7 +694,7 @@ export default function BookingPage() {
                                         ) : (
                                             <>
                                                 {total > 0
-                                                    ? `Pay Deposit — ${formatNaira(deposit)}`
+                                                    ? `Send Booking Request — ${fmt(total)}`
                                                     : "Select a Package to Continue"}
                                                 {total > 0 && <ArrowUpRight size={14} />}
                                             </>
@@ -835,9 +702,64 @@ export default function BookingPage() {
                                     </motion.button>
 
                                     <p className="text-[10px] text-white/20 text-center">
-                                        Secure payment via Paystack. Balance of {total > 0 ? formatNaira(total - deposit) : "—"} due 7 days before session.
+                                        No payment required now. Coffee will contact you within 24 hours to confirm.
                                     </p>
                                 </form>
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+
+                {/* ── Step 3: Success ── */}
+                {step === "success" && (
+                    <motion.div
+                        key="success"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="min-h-screen flex items-center justify-center px-4"
+                    >
+                        <div className="max-w-md w-full text-center py-20">
+                            <motion.div
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                                className="w-20 h-20 rounded-full bg-green-500/10 border border-green-500/30 flex items-center justify-center mx-auto mb-8"
+                            >
+                                <CheckCircle size={32} className="text-green-400" />
+                            </motion.div>
+
+                            <h2 className="text-4xl font-bold text-white mb-3">
+                                Request sent{clientName ? `, ${clientName.split(" ")[0]}` : ""}!
+                            </h2>
+                            <p className="text-white/40 text-sm leading-relaxed mb-6 max-w-sm mx-auto">
+                                Coffee has received your booking request and will be in touch within 24 hours to confirm your date and discuss the details.
+                            </p>
+
+                            {total > 0 && (
+                                <div className="bg-white/[0.03] border border-white/8 rounded-xl p-4 mb-8 text-left">
+                                    <p className="text-[9px] text-amber-400/60 uppercase tracking-[0.3em] mb-2">Your Request</p>
+                                    <div className="flex justify-between">
+                                        <span className="text-xs text-white/40 capitalize">{bookingType} Photography</span>
+                                        <span className="text-xs text-amber-400 font-bold">{fmt(total)}</span>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="flex flex-col gap-3 max-w-xs mx-auto">
+                                
+                                 <a href="https://wa.me/2348116273856?text=Hi%20Coffee%2C%20I%20just%20submitted%20a%20booking%20request"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center justify-center gap-2 py-3.5 bg-[#25D366] hover:bg-green-500 text-white text-xs font-bold uppercase tracking-widest rounded-full transition-colors duration-300"
+                                >
+                                    <MessageCircle size={14} />
+                                    Message Coffee on WhatsApp
+                                </a>
+                                <Link href="/">
+                                    <button className="w-full py-3.5 border border-white/10 hover:border-white/30 text-white/50 hover:text-white text-xs uppercase tracking-widest rounded-full transition-all duration-300">
+                                        Back to Home
+                                    </button>
+                                </Link>
                             </div>
                         </div>
                     </motion.div>

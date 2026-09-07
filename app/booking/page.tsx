@@ -305,51 +305,50 @@ export default function BookingPage() {
     const deposit = calcDeposit(total);
 
     const handleSubmitForm = async (data: any) => {
-        if (!selectedWeddingPkg && bookingType === "wedding") {
-            toast.error("Please select a wedding package");
-            return;
-        }
-        if (!selectedEventPkg && bookingType === "event") {
-            toast.error("Please select an event package");
-            return;
-        }
-        if (!selectedStudioPkg && bookingType === "studio") {
-            toast.error("Please select a session package");
-            return;
-        }
+    if (!selectedWeddingPkg && bookingType === "wedding") {
+        toast.error("Please select a wedding package");
+        return;
+    }
+    if (!selectedEventPkg && bookingType === "event") {
+        toast.error("Please select an event package");
+        return;
+    }
+    if (!selectedStudioPkg && bookingType === "studio") {
+        toast.error("Please select a session package");
+        return;
+    }
 
-        setIsSubmitting(true);
-        try {
-            const bookingDetails = {
-                ...data,
-                bookingType,
-                weddingPackage: selectedWeddingPkg,
-                weddingEvents: weddingEvents,
-                weddingDate,
-                eventPackage: selectedEventPkg,
-                eventDate,
-                studioPackage: selectedStudioPkg,
-                sessionDate,
-                extras: selectedExtras,
-                contentPackage: includeContent,
-                totalPrice: total,
-                depositAmount: deposit,
-            };
+    setIsSubmitting(true);
+    try {
+        const bookingDetails = {
+            ...data,
+            bookingType,
+            weddingPackage: selectedWeddingPkg,
+            weddingEvents,
+            weddingDate,
+            eventPackage: selectedEventPkg,
+            eventDate,
+            studioPackage: selectedStudioPkg,
+            sessionDate,
+            extras: selectedExtras,
+            contentPackage: includeContent,
+            totalPrice: total,
+        };
 
-            const res = await fetch("/api/booking/initiate", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(bookingDetails),
-            });
-            if (!res.ok) throw new Error();
-            const { authorization_url } = await res.json();
-            window.location.href = authorization_url;
-        } catch {
-            toast.error("Failed to initiate payment. Please message Coffee on WhatsApp.");
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
+        const res = await fetch("/api/booking", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(bookingDetails),
+        });
+        if (!res.ok) throw new Error();
+        setStep("success");
+        setClientName(`${data.firstName} ${data.lastName}`.trim());
+    } catch {
+        toast.error("Something went wrong. Please message Coffee on WhatsApp.");
+    } finally {
+        setIsSubmitting(false);
+    }
+};
 
     const selectedPkg = bookingType === "wedding"
         ? WEDDING_PACKAGES.find(p => p.id === selectedWeddingPkg)

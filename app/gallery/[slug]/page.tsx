@@ -6,11 +6,10 @@ import { GalleryTypesDocument } from "@/prismicio-types";
 
 export const dynamic = "force-dynamic";
 
-const page = async ({ params }: { params: { slug: string } }) => {
+const page = async ({ params }: { params: Promise<{ slug: string }> }) => {
+    const { slug } = await params;
     const client = createClient();
-    const galleryType = await getSingleGalleryQuery(client, params.slug);
-
-    console.log(galleryType);
+    const galleryType = await getSingleGalleryQuery(client, slug);
 
     return (
         <MainPage

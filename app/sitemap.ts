@@ -1,7 +1,7 @@
 import { MetadataRoute } from "next";
 import { createClient } from "@/prismicio";
 
-const BASE_URL = "https://coffeeshotit.com";
+const BASE_URL = "https://coffeeshotit.org";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Static pages

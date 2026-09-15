@@ -39,12 +39,12 @@ export const metadata: Metadata = {
     ],
     authors: [{ name: "CoffeeShotIt" }],
     creator: "CoffeeShotIt",
-    metadataBase: new URL("https://coffeeshotit.com"),
+    metadataBase: new URL("https://coffeeshotit.org"),
     alternates: { canonical: "/" },
     openGraph: {
         type: "website",
         locale: "en_NG",
-        url: "https://coffeeshotit.com",
+        url: "https://coffeeshotit.org",
         siteName: "CoffeeShotIt",
         title: "CoffeeShotIt — Professional Photography in Nigeria",
         description:

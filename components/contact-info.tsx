@@ -17,8 +17,8 @@ const INFO = [
     {
         icon: Mail,
         label: "Email",
-        value: "hello@coffeeshotit.com",
-        href: "mailto:hello@coffeeshotit.com",
+        value: "hello@coffeeshotit.org",
+        href: "mailto:hello@coffeeshotit.org",
     },
     {
         icon: Phone,

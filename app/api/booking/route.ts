@@ -148,7 +148,7 @@ export async function POST(request: Request) {
                                 Message on WhatsApp
                             </a>
                             <p style="color:#444;font-size:11px;margin-top:32px;border-top:1px solid #222;padding-top:16px;">
-                                CoffeeShotIt Media · Lagos, Nigeria · hello@coffeeshotit.com
+                                CoffeeShotIt Media · Lagos, Nigeria · hello@coffeeshotit.org
                             </p>
                         </div>
                     `,

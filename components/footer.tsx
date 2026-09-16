@@ -20,7 +20,7 @@ const SOCIAL_LINKS = [
     { icon: Instagram, href: "https://instagram.com/coffeeshotit", label: "Instagram" },
     { icon: Twitter, href: "https://twitter.com/coffeeshotit", label: "Twitter" },
     { icon: Youtube, href: "https://youtube.com/@coffeeshotit", label: "YouTube" },
-    { icon: Mail, href: "mailto:hello@coffeeshotit.com", label: "Email" },
+    { icon: Mail, href: "mailto:hello@coffeeshotit.org", label: "Email" },
 ];
 
 export default function Footer() {

@@ -4,7 +4,7 @@ import { createClient } from '@/prismicio';
 export async function GET()
 {
     const client = createClient();
-    const baseUrl = process.env.SITE_URL || 'https://coffeeshotit.com';
+    const baseUrl = process.env.SITE_URL || 'https://coffeeshotit.org';
 
     try {
         // Fetch all projects and categories

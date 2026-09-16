@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 
 export default function robots(): MetadataRoute.Robots
 {
-    const baseUrl = process.env.SITE_URL || 'https://coffeeshotit.com';
+    const baseUrl = process.env.SITE_URL || 'https://coffeeshotit.org';
 
     return {
         rules: [

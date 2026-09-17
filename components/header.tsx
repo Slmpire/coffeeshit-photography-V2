@@ -45,11 +45,11 @@ export default function Header() {
                 initial={{ y: -80, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
-                className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ${
-                    scrolled
-                        ? "bg-black/95 backdrop-blur-md border-b border-white/5 shadow-2xl"
-                        : "bg-transparent"
-                }`}
+               className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ${
+    scrolled
+        ? "bg-background/95 backdrop-blur-md border-b border-foreground/5 shadow-2xl"
+        : "bg-transparent"
+}`}
             >
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between h-16 md:h-20">

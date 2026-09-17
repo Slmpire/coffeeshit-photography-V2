@@ -83,7 +83,7 @@ export default function RootLayout({
     children: React.ReactNode;
 }) {
     return (
-        <html lang="en" suppressHydrationWarning className="dark">
+        <html lang="en" suppressHydrationWarning>
             <head>
                 <link
                     rel="icon"
@@ -100,7 +100,7 @@ export default function RootLayout({
                 <meta name="theme-color" content="#000000" />
             </head>
             <body
-                className={`${raleway.variable} ${dancingScript.variable} font-[family-name:var(--font-raleway)] bg-background text-foreground overflow-x-hidden antialiased`}
+                className={`${raleway.variable} ${dancingScript.variable} font-[family-name:var(--font-raleway)] bg-black text-white overflow-x-hidden antialiased`}
             >
                 <Provider>
                     <IntroAnimation />

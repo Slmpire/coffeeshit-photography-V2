@@ -17,6 +17,7 @@ module.exports = {
             },
         },
         extend: {
+            
             fontFamily: {
                 signature: ["Dancing Script", "cursive"],
             },

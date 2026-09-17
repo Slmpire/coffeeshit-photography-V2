@@ -26,36 +26,12 @@
         --radius: 0.5rem;
     }
 
-    /* Light mode overrides */
-    @media (prefers-color-scheme: light) {
-        :root {
-            --background: 0 0% 98%;
-            --foreground: 0 0% 5%;
-            --card: 0 0% 95%;
-            --card-foreground: 0 0% 5%;
-            --popover: 0 0% 95%;
-            --popover-foreground: 0 0% 5%;
-            --primary: 38 92% 45%;
-            --primary-foreground: 0 0% 100%;
-            --secondary: 0 0% 90%;
-            --secondary-foreground: 0 0% 5%;
-            --muted: 0 0% 85%;
-            --muted-foreground: 0 0% 40%;
-            --accent: 38 92% 45%;
-            --accent-foreground: 0 0% 100%;
-            --border: 0 0% 85%;
-            --input: 0 0% 85%;
-            --ring: 38 92% 45%;
-        }
-    }
-
     * {
         @apply border-border;
     }
 
     body {
         @apply bg-background text-foreground;
-        transition: background-color 0.3s ease, color 0.3s ease;
     }
 
     html {
@@ -88,24 +64,11 @@
 
 @layer components {
     .text-gradient {
-        @apply bg-gradient-to-r from-amber-600 via-amber-500 to-amber-400 bg-clip-text text-transparent;
-    }
-
-    /* Light mode text gradient */
-    @media (prefers-color-scheme: light) {
-        .text-gradient {
-            @apply bg-gradient-to-r from-amber-700 via-amber-600 to-amber-500 bg-clip-text text-transparent;
-        }
+        @apply bg-gradient-to-r from-white via-amber-200 to-amber-400 bg-clip-text text-transparent;
     }
 
     .glass-effect {
         @apply bg-white/5 backdrop-blur-md border border-white/10;
-    }
-
-    @media (prefers-color-scheme: light) {
-        .glass-effect {
-            @apply bg-black/5 backdrop-blur-md border border-black/10;
-        }
     }
 
     .hover-glow:hover {
@@ -121,6 +84,11 @@
 @keyframes glow {
     0%, 100% { opacity: 0.5; }
     50% { opacity: 1; }
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
 }
 
 .animate-float {
@@ -148,60 +116,32 @@
         0 16px 32px rgba(0, 0, 0, 0.4);
 }
 
-@media (prefers-color-scheme: light) {
-    .premium-shadow {
-        box-shadow:
-            0 0 0 1px rgba(0, 0, 0, 0.05),
-            0 4px 6px rgba(0, 0, 0, 0.1),
-            0 16px 32px rgba(0, 0, 0, 0.15);
+@media (max-width: 1023px) {
+    .signature-font {
+        font-size: clamp(2rem, 8vw, 4rem);
     }
 }
+/* Fix date/time picker icons on dark backgrounds */
 
-/* Date and time input */
 input[type="date"],
 input[type="time"] {
     color-scheme: dark;
     color: white;
 }
 
-@media (prefers-color-scheme: light) {
-    input[type="date"],
-    input[type="time"] {
-        color-scheme: light;
-        color: black;
-    }
-}
-
 input[type="date"]::-webkit-calendar-picker-indicator,
 input[type="time"]::-webkit-calendar-picker-indicator {
     filter: brightness(0) invert(1);
-    opacity: 0.5;
     cursor: pointer;
+    opacity: 0.6;
 }
 
-@media (prefers-color-scheme: light) {
-    input[type="date"]::-webkit-calendar-picker-indicator,
-    input[type="time"]::-webkit-calendar-picker-indicator {
-        filter: none;
-        opacity: 0.6;
-    }
-}
-
-/* Select dropdown */
+/* Native select dropdown fix */
 select option {
     background-color: #0a0a0a;
     color: white;
 }
 
-@media (prefers-color-scheme: light) {
-    select option {
-        background-color: #f5f5f5;
-        color: black;
-    }
-}
-
-@media (max-width: 1023px) {
-    .signature-font {
-        font-size: clamp(2rem, 8vw, 4rem);
-    }
+select {
+    color-scheme: dark;
 }

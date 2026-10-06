@@ -7,7 +7,7 @@ import { ArrowUpRight, Play } from "lucide-react";
 
 // Replace this with Coffee's actual YouTube video ID
 // e.g. for https://youtube.com/watch?v=dQw4w9WgXcQ the ID is dQw4w9WgXcQ
-const VIDEO_ID = "dQw4w9WgXcQ";
+const VIDEO_ID = "rqzODDR0qMU";
 
 export default function VideoReel() {
     const ref = useRef(null);

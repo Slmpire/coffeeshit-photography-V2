@@ -8,17 +8,15 @@ const nextConfig = {
     },
     images: {
         remotePatterns: [
+            // Cloudinary — primary image CDN
+            {
+                protocol: "https",
+                hostname: "res.cloudinary.com",
+            },
+            // Prismic — kept as fallback while migrating existing images
             {
                 protocol: "https",
                 hostname: "images.prismic.io",
-            },
-            {
-                protocol: "https",
-                hostname: "via.placeholder.com",
-            },
-            {
-                protocol: "https",
-                hostname: "placehold.co",
             },
         ],
         formats: ["image/webp", "image/avif"],
@@ -96,8 +94,8 @@ const nextConfig = {
 
     // Environment variables for SEO
     env: {
-        SITE_URL: process.env.SITE_URL || "https://coffeeshotit.com",
-        SITE_NAME: "Coffeeshotit Media",
+        SITE_URL: process.env.SITE_URL || "https://coffeeshotit.org",
+        SITE_NAME: "CoffeeShotIt Media",
         SITE_DESCRIPTION:
             "Professional photography and videography services in Nigeria",
     },

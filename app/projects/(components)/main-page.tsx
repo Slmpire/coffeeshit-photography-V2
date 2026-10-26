@@ -1,40 +1,44 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
-import { CategoriesDocument, ProjectsDocument } from "@/prismicio-types";
-import { useQuery } from "@tanstack/react-query";
-import { getPaginatedProjects } from "../actions";
+import { type Project } from "@/types/content";
 
-interface MainPageProps {
-    categories: CategoriesDocument[];
+interface Category {
+    uid: string;
+    title: string;
 }
 
-export default function ProjectsMainPage({ categories }: MainPageProps) {
+interface MainPageProps {
+    categories: Category[];
+    projects: Project[];
+}
+
+const PAGE_SIZE = 12;
+
+export default function ProjectsMainPage({ categories, projects }: MainPageProps) {
     const [selectedCategory, setSelectedCategory] = useState("all");
     const [currentPage, setCurrentPage] = useState(1);
 
-    const { data, isLoading } = useQuery({
-        queryKey: ["projects", selectedCategory, currentPage],
-        queryFn: () =>
-            getPaginatedProjects(
-                currentPage,
-                12,
-                selectedCategory === "all" ? "" : selectedCategory
-            ),
-        staleTime: 1000 * 60 * 5,
-    });
+    const filtered = useMemo(() => {
+        if (selectedCategory === "all") return projects;
+        return projects.filter((p) => p.category === selectedCategory);
+    }, [projects, selectedCategory]);
+
+    const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+
+    const paginated = useMemo(() => {
+        const start = (currentPage - 1) * PAGE_SIZE;
+        return filtered.slice(start, start + PAGE_SIZE);
+    }, [filtered, currentPage]);
 
     const handleCategory = (cat: string) => {
         setSelectedCategory(cat);
         setCurrentPage(1);
     };
-
-    const projects = data?.data ?? [];
-    const totalPages = data?.totalPages ?? 1;
 
     return (
         <main className="w-full bg-black text-white min-h-screen">
@@ -55,7 +59,7 @@ export default function ProjectsMainPage({ categories }: MainPageProps) {
                             <span className="text-white/20">Projects</span>
                         </h1>
                         <p className="text-white/40 text-base font-light leading-relaxed max-w-sm md:ml-auto">
-                            A curated collection of moments, emotions, and stories captured through Coffee's lens.
+                            A curated collection of moments, emotions, and stories captured through Coffee&apos;s lens.
                         </p>
                     </div>
                 </div>
@@ -80,21 +84,23 @@ export default function ProjectsMainPage({ categories }: MainPageProps) {
                         </motion.button>
 
                         {/* Category buttons */}
-                        {categories?.map((cat) => (
-                            <motion.button
-                                key={cat.id}
-                                onClick={() => handleCategory(cat.uid)}
-                                whileHover={{ scale: 1.03 }}
-                                whileTap={{ scale: 0.97 }}
-                                className={`px-4 py-2 text-[10px] uppercase tracking-[0.3em] rounded-full border transition-all duration-300 ${
-                                    selectedCategory === cat.uid
-                                        ? "bg-amber-500 border-amber-500 text-black font-bold"
-                                        : "border-white/15 text-white/40 hover:border-white/40 hover:text-white"
-                                }`}
-                            >
-                                {cat.data.title as string}
-                            </motion.button>
-                        ))}
+                        {categories
+                            .filter((c) => c.uid !== "all")
+                            .map((cat) => (
+                                <motion.button
+                                    key={cat.uid}
+                                    onClick={() => handleCategory(cat.uid)}
+                                    whileHover={{ scale: 1.03 }}
+                                    whileTap={{ scale: 0.97 }}
+                                    className={`px-4 py-2 text-[10px] uppercase tracking-[0.3em] rounded-full border transition-all duration-300 ${
+                                        selectedCategory === cat.uid
+                                            ? "bg-amber-500 border-amber-500 text-black font-bold"
+                                            : "border-white/15 text-white/40 hover:border-white/40 hover:text-white"
+                                    }`}
+                                >
+                                    {cat.title}
+                                </motion.button>
+                            ))}
                     </div>
                 </div>
             </section>
@@ -102,23 +108,7 @@ export default function ProjectsMainPage({ categories }: MainPageProps) {
             {/* Projects grid */}
             <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
                 <AnimatePresence mode="wait">
-                    {isLoading ? (
-                        /* Skeleton */
-                        <motion.div
-                            key="skeleton"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-                        >
-                            {[1, 2, 3, 4, 5, 6].map((i) => (
-                                <div
-                                    key={i}
-                                    className="h-[40vh] rounded-2xl bg-white/[0.03] animate-pulse"
-                                />
-                            ))}
-                        </motion.div>
-                    ) : projects.length > 0 ? (
+                    {paginated.length > 0 ? (
                         <motion.div
                             key={`${selectedCategory}-${currentPage}`}
                             initial={{ opacity: 0, y: 20 }}
@@ -127,18 +117,15 @@ export default function ProjectsMainPage({ categories }: MainPageProps) {
                             transition={{ duration: 0.5 }}
                             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
                         >
-                            {projects.map((project: ProjectsDocument, idx: number) => {
-                                const year = project?.last_publication_date
-                                    ? String(project.last_publication_date).slice(0, 4)
+                            {paginated.map((project, idx) => {
+                                const year = project.date
+                                    ? new Date(project.date).getFullYear()
                                     : "2025";
-                                const category = (project?.data?.category as any)?.uid
-                                    ?.replace(/-/g, " ")
-                                    ?.toUpperCase() ?? "PHOTOGRAPHY";
                                 const isLarge = idx === 0;
 
                                 return (
                                     <motion.div
-                                        key={project.id}
+                                        key={project.uid}
                                         initial={{ opacity: 0, y: 30 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ duration: 0.6, delay: Math.min(idx * 0.07, 0.4) }}
@@ -148,12 +135,10 @@ export default function ProjectsMainPage({ categories }: MainPageProps) {
                                             href={`/projects/${project.uid}`}
                                             className="group block relative overflow-hidden rounded-2xl"
                                         >
-                                            <div className={`relative overflow-hidden ${
-                                                isLarge ? "h-[55vh]" : "h-[40vh]"
-                                            }`}>
+                                            <div className={`relative overflow-hidden ${isLarge ? "h-[55vh]" : "h-[40vh]"}`}>
                                                 <Image
-                                                    src={project?.data?.cover_image?.url ?? "https://images.prismic.io/coffeeshotit/aFS4vnfc4bHWijt6_Coffee.jpg?auto=format,compress"}
-                                                    alt={project?.data?.title as string ?? "Project"}
+                                                    src={project.coverImage.url}
+                                                    alt={project.coverImage.alt}
                                                     fill
                                                     className="object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-105"
                                                     sizes={isLarge
@@ -172,7 +157,7 @@ export default function ProjectsMainPage({ categories }: MainPageProps) {
                                                 {/* Category tag */}
                                                 <div className="absolute top-4 left-4">
                                                     <span className="text-[9px] text-white/60 uppercase tracking-[0.3em] bg-black/40 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/10">
-                                                        {category}
+                                                        {project.category.replace(/-/g, " ")}
                                                     </span>
                                                 </div>
 
@@ -187,10 +172,8 @@ export default function ProjectsMainPage({ categories }: MainPageProps) {
                                                         {year}
                                                     </span>
                                                     <div className="flex items-end justify-between">
-                                                        <h3 className={`font-bold text-white leading-tight ${
-                                                            isLarge ? "text-xl md:text-2xl" : "text-base md:text-lg"
-                                                        }`}>
-                                                            {project?.data?.title as string ?? "Untitled"}
+                                                        <h3 className={`font-bold text-white leading-tight ${isLarge ? "text-xl md:text-2xl" : "text-base md:text-lg"}`}>
+                                                            {project.title}
                                                         </h3>
                                                         <ArrowUpRight
                                                             size={18}
@@ -216,9 +199,7 @@ export default function ProjectsMainPage({ categories }: MainPageProps) {
                                 No projects found
                             </p>
                             <p className="text-white/10 text-xs mb-8">
-                                {selectedCategory !== "all"
-                                    ? "Try a different category"
-                                    : "Check back soon"}
+                                {selectedCategory !== "all" ? "Try a different category" : "Check back soon"}
                             </p>
                             {selectedCategory !== "all" && (
                                 <button
@@ -233,14 +214,13 @@ export default function ProjectsMainPage({ categories }: MainPageProps) {
                 </AnimatePresence>
 
                 {/* Pagination */}
-                {totalPages > 1 && !isLoading && (
+                {totalPages > 1 && (
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.4 }}
                         className="flex items-center justify-center gap-2 mt-16"
                     >
-                        {/* Prev */}
                         <button
                             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                             disabled={currentPage === 1}
@@ -249,7 +229,6 @@ export default function ProjectsMainPage({ categories }: MainPageProps) {
                             Prev
                         </button>
 
-                        {/* Pages */}
                         {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                             <button
                                 key={page}
@@ -267,7 +246,6 @@ export default function ProjectsMainPage({ categories }: MainPageProps) {
                             </button>
                         ))}
 
-                        {/* Next */}
                         <button
                             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                             disabled={currentPage === totalPages}

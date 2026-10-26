@@ -1,77 +1,33 @@
+import { createClient as createPrismicClient } from "@prismicio/client";
+import { IMAGES, SERVICES, FAQ, FEATURED_PROJECT_UIDS, PROJECTS } from "@/content/site.config";
 import MainHomepage from "@/components/main-homepage";
-import { getGalleryImagesQuery } from "@/lib/query/gallery.query";
-import {
-    getFaq,
-    getServices,
-    getStoryTellerImages,
-    getImageCollage,
-    getSliderImage,
-} from "@/lib/query/home.query";
-import {
-    FeaturedProjectsQuery,
-    getStatsImages,
-} from "@/lib/query/project.query";
-import { createClient } from "@/prismicio";
-import {
-    FaqDocument,
-    GalleryTypesDocument,
-    HomepageImageCollageDocument,
-    ProjectsDocument,
-    ServicesDocument,
-    SliderDocument,
-    StatsImagesDocument,
-    StoryTellerDocument,
-} from "@/prismicio-types";
-import React from "react";
+import type { Metadata } from "next";
 
-// Set revalidation time to 60 seconds for ISR
+export const metadata: Metadata = {
+    title: "CoffeeShotIt — Professional Photography in Lagos, Nigeria",
+    description:
+        "Professional photography and videography services in Nigeria. Weddings, events, portraits, proposals. Based in Lagos, available nationwide and internationally.",
+    openGraph: {
+        title: "CoffeeShotIt — Professional Photography",
+        description:
+            "Cinematic wedding, event and portrait photography based in Lagos, Nigeria.",
+        images: [IMAGES.heroSlider[0].url],
+    },
+};
+
 export const revalidate = 60;
 
-const page = async () => {
-    const client = createClient();
-
-    // Fetch all data in parallel
-    const [
-        featuredProjects,
-        statsImages,
-        services,
-        faq,
-        galleryTypes,
-        storyTellerImages,
-        imageCollage,
-        sliderImage,
-    ] = await Promise.all([
-        FeaturedProjectsQuery(client),
-        getStatsImages(client),
-        getServices(client),
-        getFaq(client),
-        getGalleryImagesQuery(client),
-        getStoryTellerImages(client),
-        getImageCollage(client),
-        getSliderImage(client),
-    ]);
-
-    console.log("slider data:", sliderImage);
+export default async function HomePage() {
+    const featuredProjects = PROJECTS.filter((p) =>
+        FEATURED_PROJECT_UIDS.includes(p.uid)
+    );
 
     return (
         <MainHomepage
-            statsImages={statsImages as StatsImagesDocument}
-            featuredProjects={
-                featuredProjects?.data
-                    ?.featured_projects as unknown as ProjectsDocument[]
-            }
-            faq={faq as unknown as FaqDocument[]}
-            services={services as unknown as ServicesDocument[]}
-            galleryTypes={galleryTypes as unknown as GalleryTypesDocument[]}
-            storyTellerImages={
-                storyTellerImages as unknown as StoryTellerDocument[]
-            }
-            imageCollage={
-                imageCollage as unknown as HomepageImageCollageDocument[]
-            }
-            slider={sliderImage as unknown as string[]}
+            featuredProjects={featuredProjects}
+            services={SERVICES}
+            faq={FAQ}
+            galleryTypes={IMAGES.portfolioCategories}
         />
     );
-};
-
-export default page;
+}

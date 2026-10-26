@@ -5,7 +5,7 @@ import { motion, useInView } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
-import { GalleryTypesDocument } from "@/prismicio-types";
+import { type PortfolioCategory } from "@/types/content";
 
 const STATS = [
     { number: "500+", label: "Sessions Shot" },
@@ -15,7 +15,7 @@ const STATS = [
 ];
 
 interface AboutProps {
-    galleryTypes: GalleryTypesDocument[];
+    galleryTypes: PortfolioCategory[];
 }
 
 export default function About({ galleryTypes }: AboutProps) {
@@ -55,7 +55,7 @@ export default function About({ galleryTypes }: AboutProps) {
                     >
                         <div className="relative h-[500px] md:h-[620px] rounded-2xl overflow-hidden">
                             <Image
-                                src="https://images.prismic.io/coffeeshotit/aFS4vnfc4bHWijt6_Coffee.jpg?auto=format,compress"
+                                src="https://res.cloudinary.com/wuruxed3/image/upload/v1793017822/_J6to0wx10keiQXZ_5I5A0138.jpg?auto=format,compress"
                                 alt="Coffee — Professional Photographer"
                                 fill
                                 className="object-cover"
@@ -163,7 +163,7 @@ export default function About({ galleryTypes }: AboutProps) {
                         <div className="flex flex-col divide-y divide-white/5">
                             {galleryTypes.map((galleryType, i) => (
                                 <motion.div
-                                    key={galleryType.id}
+                                    key={galleryType.uid}
                                     initial={{ opacity: 0, x: -20 }}
                                     animate={inView ? { opacity: 1, x: 0 } : {}}
                                     transition={{ duration: 0.6, delay: 0.1 * i }}
@@ -178,10 +178,10 @@ export default function About({ galleryTypes }: AboutProps) {
                                             </span>
                                             <div>
                                                 <h3 className="text-lg md:text-xl font-semibold text-white group-hover:text-amber-300 transition-colors duration-300">
-                                                    {galleryType.data.title as string}
+                                                    {galleryType.label}
                                                 </h3>
                                                 <p className="text-sm text-white/40 font-light mt-0.5">
-                                                    {galleryType.data.description as string}
+                                                    {galleryType.description}
                                                 </p>
                                             </div>
                                         </div>

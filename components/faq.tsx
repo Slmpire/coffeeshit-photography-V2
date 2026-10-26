@@ -4,9 +4,9 @@ import { useRef, useState } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { Plus, Minus, ArrowUpRight } from "lucide-react";
-import { FaqDocument } from "@/prismicio-types";
+import { type FaqItem } from "@/types/content";
 
-export default function FAQ({ faq }: { faq: FaqDocument[] }) {
+export default function FAQ({ faq }: { faq: FaqItem[] }) {
     const [open, setOpen] = useState<number | null>(null);
     const ref = useRef(null);
     const inView = useInView(ref, { once: true, margin: "-100px" });
@@ -68,7 +68,7 @@ export default function FAQ({ faq }: { faq: FaqDocument[] }) {
                 <div className="divide-y divide-white/5 mb-16">
                     {faq?.map((item, idx) => (
                         <motion.div
-                            key={item.id ?? idx}
+                            key={idx}
                             initial={{ opacity: 0, y: 20 }}
                             animate={inView ? { opacity: 1, y: 0 } : {}}
                             transition={{ duration: 0.5, delay: 0.05 * idx }}
@@ -85,7 +85,7 @@ export default function FAQ({ faq }: { faq: FaqDocument[] }) {
 
                                 {/* Question */}
                                 <p className="flex-1 text-base md:text-lg font-medium text-white/80 group-hover:text-white transition-colors duration-300 pr-4">
-                                    {item.data.question as string}
+                                {item.question}
                                 </p>
 
                                 {/* Toggle */}
@@ -109,7 +109,7 @@ export default function FAQ({ faq }: { faq: FaqDocument[] }) {
                                         className="overflow-hidden"
                                     >
                                         <p className="text-white/50 text-sm md:text-base font-light leading-relaxed pl-10 pb-8 max-w-2xl">
-                                            {item.data.answer as string}
+                                        {item.answer}
                                         </p>
                                     </motion.div>
                                 )}

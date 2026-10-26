@@ -4,26 +4,8 @@ import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import {
-    MapPin,
-    Globe,
-    BadgeCheck,
-    ArrowDown,
-} from "lucide-react";
-import { HomepageImageCollageDocument } from "@/prismicio-types";
-
-// ─────────────────────────────────────────────
-// Fallback images
-// ─────────────────────────────────────────────
-
-const FALLBACK_IMAGES = [
-    "https://images.prismic.io/coffeeshotit/aFS4vnfc4bHWijt6_Coffee.jpg?auto=format,compress",
-    "https://images.prismic.io/coffeeshotit/aFWAGnfc4bHWilBg_5I5A0292-2.jpg?auto=format,compress",
-    "https://images.prismic.io/coffeeshotit/aFS4vnfc4bHWijt6_Coffee.jpg?auto=format,compress",
-    "https://images.prismic.io/coffeeshotit/aFWAGnfc4bHWilBg_5I5A0292-2.jpg?auto=format,compress",
-    "https://images.prismic.io/coffeeshotit/aFS4vnfc4bHWijt6_Coffee.jpg?auto=format,compress",
-    "https://images.prismic.io/coffeeshotit/aFWAGnfc4bHWilBg_5I5A0292-2.jpg?auto=format,compress",
-];
+import { MapPin, Globe, BadgeCheck, ArrowDown } from "lucide-react";
+import { IMAGES } from "@/content/site.config";
 
 // ─────────────────────────────────────────────
 // Bottom information items
@@ -48,10 +30,10 @@ const INFO_ITEMS = [
 ];
 
 // ─────────────────────────────────────────────
-// Desktop image grouping
+// Desktop image grouping (pads chunks to exactly 3)
 // ─────────────────────────────────────────────
 
-function chunkIntoThrees(images: string[]) {
+function chunkIntoThrees(images: string[]): string[][] {
     const chunks: string[][] = [];
 
     for (let i = 0; i < images.length; i += 3) {
@@ -237,16 +219,10 @@ function HeroContent({ loaded }: { loaded: boolean }) {
 }
 
 // ─────────────────────────────────────────────
-// Mobile layout: original single-image slider
+// Mobile layout: single-image slider
 // ─────────────────────────────────────────────
 
-function MobileHero({
-    images,
-    loaded,
-}: {
-    images: string[];
-    loaded: boolean;
-}) {
+function MobileHero({ images, loaded }: { images: string[]; loaded: boolean }) {
     const [current, setCurrent] = useState(0);
 
     useEffect(() => {
@@ -283,11 +259,8 @@ function MobileHero({
                     </motion.div>
                 </AnimatePresence>
 
-                {/* Original mobile overlays */}
                 <div className="absolute inset-0 z-10 bg-black/55" />
-
                 <div className="absolute inset-0 z-10 bg-gradient-to-t from-black via-black/20 to-black/30" />
-
                 <div className="absolute inset-0 z-10 bg-gradient-to-r from-black/40 via-transparent to-black/40" />
             </div>
 
@@ -310,7 +283,6 @@ function MobileHero({
             {/* Main content */}
             <div className="relative z-30 flex min-h-[100svh] flex-1 flex-col">
                 <HeroContent loaded={loaded} />
-
                 <InfoBar loaded={loaded} />
             </div>
 
@@ -358,11 +330,7 @@ function MobileHero({
             >
                 <motion.div
                     animate={{ y: [0, 6, 0] }}
-                    transition={{
-                        repeat: Infinity,
-                        duration: 1.8,
-                        ease: "easeInOut",
-                    }}
+                    transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}
                 >
                     <ArrowDown className="h-4 w-4 text-white/40" />
                 </motion.div>
@@ -372,16 +340,10 @@ function MobileHero({
 }
 
 // ─────────────────────────────────────────────
-// Desktop and landscape layout: three panels
+// Desktop layout: three-panel cinematic
 // ─────────────────────────────────────────────
 
-function DesktopHero({
-    imageSets,
-    loaded,
-}: {
-    imageSets: string[][];
-    loaded: boolean;
-}) {
+function DesktopHero({ imageSets, loaded }: { imageSets: string[][]; loaded: boolean }) {
     const [current, setCurrent] = useState(0);
 
     const activeSet = imageSets[current] ?? imageSets[0];
@@ -429,7 +391,7 @@ function DesktopHero({
                                 sizes="33vw"
                                 quality={90}
                                 priority={current === 0 && idx === 0}
-                                className="object-contain"
+                                className="object-cover"
                             />
 
                             <div className="absolute inset-0 shadow-[inset_0_0_60px_rgba(0,0,0,0.5)]" />
@@ -453,21 +415,15 @@ function DesktopHero({
 
             {/* Overlays */}
             <div className="absolute inset-0 z-10 bg-black/45" />
-
             <div className="absolute inset-0 z-10 bg-gradient-to-t from-black via-transparent to-black/30" />
-
             <div className="absolute inset-0 z-10 bg-gradient-to-r from-black/30 via-transparent to-black/30" />
 
             {/* Panel dividers */}
             <div className="pointer-events-none absolute inset-0 z-10 flex">
                 <div className="flex-1" />
-
                 <div className="h-full w-[2px] bg-gradient-to-b from-transparent via-white/10 to-transparent" />
-
                 <div className="flex-1" />
-
                 <div className="h-full w-[2px] bg-gradient-to-b from-transparent via-white/10 to-transparent" />
-
                 <div className="flex-1" />
             </div>
 
@@ -480,7 +436,7 @@ function DesktopHero({
                 transition={{ delay: 2.5, duration: 1 }}
                 className="absolute left-6 top-1/2 z-30 hidden -translate-y-1/2 flex-col items-center gap-4 lg:flex"
             >
-                <span className="text-[9px] uppercase tracking-[0.4em] text-white/30 [writing-mode:vertical-rl] rotate-180">
+                <span className="rotate-180 text-[9px] uppercase tracking-[0.4em] text-white/30 [writing-mode:vertical-rl]">
                     Scroll to Explore
                 </span>
 
@@ -504,7 +460,6 @@ function DesktopHero({
             {/* Main content */}
             <div className="relative z-30 flex h-full flex-1 flex-col">
                 <HeroContent loaded={loaded} />
-
                 <InfoBar loaded={loaded} />
             </div>
 
@@ -552,11 +507,7 @@ function DesktopHero({
             >
                 <motion.div
                     animate={{ y: [0, 6, 0] }}
-                    transition={{
-                        repeat: Infinity,
-                        duration: 1.8,
-                        ease: "easeInOut",
-                    }}
+                    transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}
                 >
                     <ArrowDown className="h-4 w-4 text-white/30" />
                 </motion.div>
@@ -566,56 +517,30 @@ function DesktopHero({
 }
 
 // ─────────────────────────────────────────────
-// Main component
+// Main export — no props needed (uses static config)
 // ─────────────────────────────────────────────
 
-export default function Hero({
-    imageCollage,
-    slider,
-}: {
-    imageCollage: HomepageImageCollageDocument[];
-    slider: string[];
-}) {
+export default function Hero() {
     const [loaded, setLoaded] = useState(false);
 
-    // Prefer CMS slider images; fall back when empty.
-    const images = useMemo(() => {
-        const validImages = (slider ?? []).filter(
-            (src): src is string =>
-                typeof src === "string" && src.trim().length > 0
-        );
-
-        return validImages.length > 0
-            ? validImages
-            : FALLBACK_IMAGES;
-    }, [slider]);
-
-    const imageSets = useMemo(
-        () => chunkIntoThrees(images),
-        [images]
+    // Flatten heroSlider to plain URL strings
+    const images = useMemo(
+        () => IMAGES.heroSlider.map((img) => img.url),
+        []
     );
 
-    // Trigger the entrance animations after mount.
-    useEffect(() => {
-        const timer = window.setTimeout(() => {
-            setLoaded(true);
-        }, 100);
+    const imageSets = useMemo(() => chunkIntoThrees(images), [images]);
 
+    // Trigger entrance animations after mount
+    useEffect(() => {
+        const timer = window.setTimeout(() => setLoaded(true), 100);
         return () => window.clearTimeout(timer);
     }, []);
-
-    // Retain imageCollage in the public props for compatibility
-    // with the existing Prismic page implementation.
-    void imageCollage;
 
     return (
         <>
             <MobileHero images={images} loaded={loaded} />
-
-            <DesktopHero
-                imageSets={imageSets}
-                loaded={loaded}
-            />
+            <DesktopHero imageSets={imageSets} loaded={loaded} />
         </>
     );
 }

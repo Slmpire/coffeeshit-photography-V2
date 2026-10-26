@@ -5,10 +5,10 @@ import { motion, useInView } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
-import { ProjectsDocument } from "@/prismicio-types";
+import { type Project } from "@/types/content";
 
 interface ProjectsSectionProps {
-    projects: ProjectsDocument[];
+    projects: Project[];
 }
 
 export default function ProjectsSection({ projects }: ProjectsSectionProps) {
@@ -24,7 +24,6 @@ export default function ProjectsSection({ projects }: ProjectsSectionProps) {
             className="w-full bg-black text-white py-24 md:py-32 overflow-hidden"
         >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
                 {/* Section label */}
                 <motion.div
                     initial={{ opacity: 0, x: -20 }}
@@ -67,54 +66,47 @@ export default function ProjectsSection({ projects }: ProjectsSectionProps) {
                 {/* Project grid */}
                 {validProjects.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5 mb-16">
-                        {validProjects.map((item: any, idx) => {
-                            const project = item?.project ?? item;
-                            if (!project) return null;
-
-                            const year = project?.last_publication_date
-                                ? String(project.last_publication_date).slice(0, 4)
+                        {validProjects.map((project, idx) => {
+                            const year = project.date
+                                ? new Date(project.date).getFullYear()
                                 : "2025";
-                            const category = (project?.data?.category as any)?.data?.title
-                                ?? project?.data?.category?.uid?.replace(/-/g, " ")?.toUpperCase()
-                                ?? "PHOTOGRAPHY";
-
                             const isHero = idx === 0;
 
                             return (
                                 <motion.div
-                                    key={project.id ?? idx}
+                                    key={project.uid}
                                     initial={{ opacity: 0, y: 40 }}
                                     animate={inView ? { opacity: 1, y: 0 } : {}}
                                     transition={{ duration: 0.7, delay: 0.08 * idx }}
                                     className={isHero ? "md:col-span-2 md:row-span-2" : ""}
                                 >
                                     <Link
-                                        href={`/projects/${project?.uid ?? "#"}`}
+                                        href={`/projects/${project.uid}`}
                                         className="group block relative overflow-hidden rounded-2xl h-full"
                                     >
-                                        <div className={`relative overflow-hidden ${isHero ? "h-[55vh]" : "h-[35vh]"
-                                            }`}>
+                                        <div
+                                            className={`relative overflow-hidden ${
+                                                isHero ? "h-[55vh]" : "h-[35vh]"
+                                            }`}
+                                        >
                                             <Image
-                                                src={project?.data?.cover_image?.url ?? "https://images.prismic.io/coffeeshotit/aFS4vnfc4bHWijt6_Coffee.jpg?auto=format,compress"}
-                                                alt={project?.data?.title ?? "Project"}
+                                                src={project.coverImage.url}
+                                                alt={project.coverImage.alt}
                                                 fill
                                                 className="object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-105"
-                                                sizes={isHero
-                                                    ? "(max-width: 768px) 100vw, 66vw"
-                                                    : "(max-width: 768px) 100vw, 33vw"
+                                                sizes={
+                                                    isHero
+                                                        ? "(max-width: 768px) 100vw, 66vw"
+                                                        : "(max-width: 768px) 100vw, 33vw"
                                                 }
                                             />
-
-                                            {/* Gradient */}
                                             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/10 to-transparent" />
-
-                                            {/* Hover overlay */}
                                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-500" />
 
                                             {/* Category tag */}
                                             <div className="absolute top-4 left-4">
                                                 <span className="text-[9px] text-white/60 uppercase tracking-[0.3em] bg-black/40 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/10">
-                                                    {category}
+                                                    {project.category.replace(/-/g, " ")}
                                                 </span>
                                             </div>
 
@@ -129,11 +121,14 @@ export default function ProjectsSection({ projects }: ProjectsSectionProps) {
                                                     {year}
                                                 </span>
                                                 <div className="flex items-end justify-between">
-                                                    <h3 className={`font-bold text-white leading-tight ${isHero
-                                                            ? "text-xl md:text-3xl"
-                                                            : "text-base md:text-lg"
-                                                        }`}>
-                                                        {project?.data?.title ?? "Untitled Project"}
+                                                    <h3
+                                                        className={`font-bold text-white leading-tight ${
+                                                            isHero
+                                                                ? "text-xl md:text-3xl"
+                                                                : "text-base md:text-lg"
+                                                        }`}
+                                                    >
+                                                        {project.title}
                                                     </h3>
                                                     <ArrowUpRight
                                                         size={isHero ? 22 : 16}
@@ -148,7 +143,6 @@ export default function ProjectsSection({ projects }: ProjectsSectionProps) {
                         })}
                     </div>
                 ) : (
-                    /* Empty state */
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-16">
                         {[1, 2, 3, 4, 5, 6].map((i) => (
                             <div

@@ -1,22 +1,31 @@
 import ProjectDetails from "@/components/main-project-details";
-import { SingleProjectQuery } from "@/lib/query/project.query";
-import { createClient } from "@/prismicio";
-import { ProjectsDocument } from "@/prismicio-types";
-import React from "react";
+import { PROJECTS } from "@/content/site.config";
+import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 
 interface PageProps {
-    params: Promise<{
-        id: string;
-    }>;
+    params: Promise<{ id: string }>;
 }
 
-export const dynamic = "force-dynamic";
+export async function generateStaticParams() {
+    return PROJECTS.map((p) => ({ id: p.uid }));
+}
 
-const page = async ({ params }: PageProps) => {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
     const { id } = await params;
-    const client = createClient();
-    const project = await SingleProjectQuery(client, id);
-    return <ProjectDetails project={project as unknown as ProjectsDocument} />;
-};
+    const project = PROJECTS.find((p) => p.uid === id);
+    if (!project) return {};
+    return {
+        title: `${project.title} — CoffeeShotIt`,
+        description: project.description ?? `Photography project by CoffeeShotIt: ${project.title}`,
+    };
+}
 
-export default page;
+export default async function ProjectPage({ params }: PageProps) {
+    const { id } = await params;
+    const project = PROJECTS.find((p) => p.uid === id);
+
+    if (!project) notFound();
+
+    return <ProjectDetails project={project} />;
+}

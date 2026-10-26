@@ -3,39 +3,13 @@
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import Image from "next/image";
-import { StoryTellerDocument } from "@/prismicio-types";
+import { IMAGES } from "@/content/site.config";
 
-const FALLBACK_IMAGES = [
-    "https://images.prismic.io/coffeeshotit/aFWAGnfc4bHWilBg_5I5A0292-2.jpg?auto=format,compress",
-    "https://images.prismic.io/coffeeshotit/aFS4vnfc4bHWijt6_Coffee.jpg?auto=format,compress",
-    "https://images.prismic.io/coffeeshotit/aFWAGnfc4bHWilBg_5I5A0292-2.jpg?auto=format,compress",
-    "https://images.prismic.io/coffeeshotit/aFS4vnfc4bHWijt6_Coffee.jpg?auto=format,compress",
-];
-
-interface TheVoiceProps {
-    storyTellerImages: StoryTellerDocument[];
-}
-
-export default function TheVoice({ storyTellerImages }: TheVoiceProps) {
+export default function TheVoice() {
     const ref = useRef(null);
     const inView = useInView(ref, { once: true, margin: "-100px" });
 
-    // Get images from Prismic or fall back
-    const prismicImages =
-        storyTellerImages?.[0]?.data?.images
-            ?.filter((img) => img?.image?.url)
-            ?.map((img) => ({
-                url: img.image.url!,
-                alt: img.image.alt ?? "CoffeeShotIt photography",
-            })) ?? [];
-
-    const displayImages =
-        prismicImages.length > 0
-            ? prismicImages
-            : FALLBACK_IMAGES.map((url) => ({
-                  url,
-                  alt: "CoffeeShotIt photography",
-              }));
+    const displayImages = IMAGES.storyteller.slice(0, 4);
 
     return (
         <section
@@ -43,7 +17,6 @@ export default function TheVoice({ storyTellerImages }: TheVoiceProps) {
             className="w-full bg-black text-white py-24 md:py-32 overflow-hidden"
         >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
                 {/* Section label */}
                 <motion.div
                     initial={{ opacity: 0, x: -20 }}
@@ -65,10 +38,10 @@ export default function TheVoice({ storyTellerImages }: TheVoiceProps) {
                         transition={{ duration: 1, ease: [0.76, 0, 0.24, 1] }}
                         className="text-2xl md:text-4xl lg:text-5xl font-light leading-[1.3] text-white/80 tracking-tight"
                     >
-                        "Through my lens, light becomes
-                        <span className="text-white"> poetry</span>, love leaves
+                        &quot;Through my lens, light becomes{" "}
+                        <span className="text-white">poetry</span>, love leaves
                         its trace, and{" "}
-                        <span className="text-amber-400">time stands still.</span>"
+                        <span className="text-amber-400">time stands still.</span>&quot;
                     </motion.p>
 
                     {/* Signature */}
@@ -90,8 +63,7 @@ export default function TheVoice({ storyTellerImages }: TheVoiceProps) {
 
                 {/* Image grid */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-                    {displayImages.slice(0, 4).map((image, idx) => {
-                        // Vary heights for editorial feel
+                    {displayImages.map((image, idx) => {
                         const heights = [
                             "h-64 md:h-96",
                             "h-48 md:h-72",

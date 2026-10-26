@@ -5,34 +5,32 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, ArrowUpRight, MapPin, Calendar, User } from "lucide-react";
-import { ProjectsDocument } from "@/prismicio-types";
-import { PrismicRichText } from "@prismicio/react";
+import { type Project } from "@/types/content";
 
 interface ProjectDetailsProps {
-    project: ProjectsDocument;
+    project: Project;
 }
 
 export default function ProjectDetails({ project }: ProjectDetailsProps) {
     const [selected, setSelected] = useState<string | null>(null);
 
-    const gallery = project?.data?.gallery ?? [];
-    const coverImage = project?.data?.cover_image?.url;
-    const title = project?.data?.title as string;
-    const client = project?.data?.client as string;
-    const location = project?.data?.location as string;
-    const date = project?.data?.date as string;
-    const category = (project?.data?.category as any)?.uid ?? "";
+    const gallery   = project?.gallery ?? [];
+    const coverImage = project?.coverImage;
+    const title      = project?.title;
+    const client     = project?.client;
+    const location   = project?.location;
+    const date       = project?.date;
+    const category   = project?.category ?? "";
 
     const year = date ? new Date(date).getFullYear() : null;
 
     return (
         <main className="w-full bg-black text-white min-h-screen">
-
-            {/* Hero — full viewport cover image */}
+            {/* Hero */}
             <section className="relative h-screen overflow-hidden">
                 {coverImage && (
                     <Image
-                        src={coverImage}
+                        src={coverImage.url}
                         alt={title ?? "Project"}
                         fill
                         className="object-cover"
@@ -61,8 +59,6 @@ export default function ProjectDetails({ project }: ProjectDetailsProps) {
                 {/* Hero content */}
                 <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-10 lg:p-16 z-10">
                     <div className="max-w-7xl mx-auto">
-
-                        {/* Category + year */}
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -76,7 +72,6 @@ export default function ProjectDetails({ project }: ProjectDetailsProps) {
                             </span>
                         </motion.div>
 
-                        {/* Title */}
                         <div className="overflow-hidden mb-6">
                             <motion.h1
                                 initial={{ y: 80, opacity: 0 }}
@@ -88,7 +83,6 @@ export default function ProjectDetails({ project }: ProjectDetailsProps) {
                             </motion.h1>
                         </div>
 
-                        {/* Meta */}
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -110,7 +104,12 @@ export default function ProjectDetails({ project }: ProjectDetailsProps) {
                             {date && (
                                 <div className="flex items-center gap-2 text-white/40 text-xs">
                                     <Calendar size={12} className="text-amber-400/60" />
-                                    <span>{new Date(date).toLocaleDateString("en-NG", { month: "long", year: "numeric" })}</span>
+                                    <span>
+                                        {new Date(date).toLocaleDateString("en-NG", {
+                                            month: "long",
+                                            year: "numeric",
+                                        })}
+                                    </span>
                                 </div>
                             )}
                         </motion.div>
@@ -119,7 +118,7 @@ export default function ProjectDetails({ project }: ProjectDetailsProps) {
             </section>
 
             {/* Description */}
-            {project?.data?.description && (
+            {project?.description && (
                 <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
                         <div className="flex items-center gap-3">
@@ -128,9 +127,9 @@ export default function ProjectDetails({ project }: ProjectDetailsProps) {
                                 About this project
                             </span>
                         </div>
-                        <div className="text-white/50 text-base font-light leading-relaxed prose prose-invert prose-sm max-w-none">
-                            <PrismicRichText field={project.data.description} />
-                        </div>
+                        <p className="text-white/50 text-base font-light leading-relaxed">
+                            {project.description}
+                        </p>
                     </div>
                 </section>
             )}
@@ -138,7 +137,6 @@ export default function ProjectDetails({ project }: ProjectDetailsProps) {
             {/* Gallery */}
             {gallery.length > 0 && (
                 <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
-
                     <div className="flex items-center gap-3 mb-10">
                         <div className="h-px w-10 bg-amber-400/60" />
                         <span className="text-[10px] text-amber-400 uppercase tracking-[0.5em]">
@@ -148,35 +146,33 @@ export default function ProjectDetails({ project }: ProjectDetailsProps) {
 
                     {/* Masonry-style grid */}
                     <div className="columns-1 sm:columns-2 lg:columns-3 gap-3 space-y-3">
-                        {gallery.map((item: any, idx: number) => {
-                            const url = item?.image?.url;
-                            if (!url) return null;
-
-                            return (
-                                <motion.div
-                                    key={idx}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    whileInView={{ opacity: 1, y: 0 }}
-                                    viewport={{ once: true, margin: "-50px" }}
-                                    transition={{ duration: 0.6, delay: Math.min(idx * 0.04, 0.4) }}
-                                    className="break-inside-avoid relative overflow-hidden rounded-xl cursor-pointer group"
-                                    onClick={() => setSelected(url)}
-                                >
-                                    <Image
-                                        src={url}
-                                        alt={item?.image?.alt ?? `Gallery image ${idx + 1}`}
-                                        width={800}
-                                        height={600}
-                                        className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
-                                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                                    />
-                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-500" />
-                                    <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-                                        <ArrowUpRight size={12} className="text-white" />
-                                    </div>
-                                </motion.div>
-                            );
-                        })}
+                        {gallery.map((img, idx) => (
+                            <motion.div
+                                key={idx}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true, margin: "-50px" }}
+                                transition={{
+                                    duration: 0.6,
+                                    delay: Math.min(idx * 0.04, 0.4),
+                                }}
+                                className="break-inside-avoid relative overflow-hidden rounded-xl cursor-pointer group"
+                                onClick={() => setSelected(img.url)}
+                            >
+                                <Image
+                                    src={img.url}
+                                    alt={img.alt}
+                                    width={800}
+                                    height={600}
+                                    className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
+                                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                                />
+                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-500" />
+                                <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                    <ArrowUpRight size={12} className="text-white" />
+                                </div>
+                            </motion.div>
+                        ))}
                     </div>
                 </section>
             )}
@@ -222,7 +218,7 @@ export default function ProjectDetails({ project }: ProjectDetailsProps) {
                             <h2 className="text-3xl md:text-4xl font-extrabold leading-[0.95] mb-3">
                                 Love this work?
                                 <br />
-                                <span className="text-white/20">Let's create yours.</span>
+                                <span className="text-white/20">Let&apos;s create yours.</span>
                             </h2>
                             <p className="text-white/40 text-sm font-light">
                                 Book a session with Coffee and get the same level of care and artistry for your special moment.

@@ -1,23 +1,27 @@
 "use client";
 
-import { GalleryTypesDocument } from "@/prismicio-types";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { ArrowLeft, ArrowUpRight, X } from "lucide-react";
 
-export default function GalleryMainPage({
-    galleryType,
-}: {
-    galleryType: GalleryTypesDocument;
-}) {
+type GalleryImage = { url: string; alt?: string };
+
+type Category = {
+    uid: string;
+    label: string;
+    description: string;
+    url: string;
+    alt: string;
+    gallery: GalleryImage[];
+};
+
+export default function GalleryMainPage({ category }: { category: Category }) {
     const [selected, setSelected] = useState<string | null>(null);
     const [selectedIdx, setSelectedIdx] = useState<number>(0);
 
-    const gallery = galleryType?.data?.gallery ?? [];
-    const title = galleryType?.data?.title as string;
-    const description = galleryType?.data?.description as string;
+    const gallery = category.gallery ?? [];
 
     const openLightbox = (url: string, idx: number) => {
         setSelected(url);
@@ -25,10 +29,9 @@ export default function GalleryMainPage({
     };
 
     const navigate = (dir: 1 | -1) => {
-        const validImages = gallery.filter((item: any) => item?.image?.url);
-        const newIdx = (selectedIdx + dir + validImages.length) % validImages.length;
+        const newIdx = (selectedIdx + dir + gallery.length) % gallery.length;
         setSelectedIdx(newIdx);
-        setSelected((validImages[newIdx] as any)?.image?.url);
+        setSelected(gallery[newIdx]?.url ?? null);
     };
 
     return (
@@ -59,15 +62,15 @@ export default function GalleryMainPage({
                                 </span>
                             </div>
                             <h1 className="text-5xl md:text-7xl font-extrabold leading-[0.9] tracking-tight">
-                                {title}
+                                {category.label}
                             </h1>
                         </div>
                         <div className="md:ml-auto">
                             <p className="text-white/40 text-base font-light leading-relaxed max-w-sm mb-3">
-                                {description}
+                                {category.description}
                             </p>
                             <p className="text-[10px] text-white/20 uppercase tracking-[0.3em]">
-                                {gallery.filter((item: any) => item?.image?.url).length} photos
+                                {gallery.length} photos
                             </p>
                         </div>
                     </div>
@@ -78,10 +81,8 @@ export default function GalleryMainPage({
             <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
                 {gallery.length > 0 ? (
                     <div className="columns-1 sm:columns-2 lg:columns-3 gap-3 space-y-3">
-                        {gallery.map((item: any, idx: number) => {
-                            const url = item?.image?.url;
-                            if (!url) return null;
-
+                        {gallery.map((item, idx) => {
+                            if (!item?.url) return null;
                             return (
                                 <motion.div
                                     key={idx}
@@ -90,11 +91,11 @@ export default function GalleryMainPage({
                                     viewport={{ once: true, margin: "-50px" }}
                                     transition={{ duration: 0.6, delay: Math.min(idx * 0.03, 0.3) }}
                                     className="break-inside-avoid relative overflow-hidden rounded-xl cursor-pointer group"
-                                    onClick={() => openLightbox(url, idx)}
+                                    onClick={() => openLightbox(item.url, idx)}
                                 >
                                     <Image
-                                        src={url}
-                                        alt={item?.image?.alt ?? `${title} photo ${idx + 1}`}
+                                        src={item.url}
+                                        alt={item.alt ?? `${category.label} photo ${idx + 1}`}
                                         width={800}
                                         height={600}
                                         className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
@@ -191,7 +192,7 @@ export default function GalleryMainPage({
 
                     {/* Counter */}
                     <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-[10px] text-white/30 uppercase tracking-[0.3em]">
-                        {selectedIdx + 1} / {gallery.filter((i: any) => i?.image?.url).length}
+                        {selectedIdx + 1} / {gallery.length}
                     </div>
                 </motion.div>
             )}

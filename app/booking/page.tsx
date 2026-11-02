@@ -19,6 +19,7 @@ import {
     Check,
 } from "lucide-react";
 import DatePickerInput from "@/components/date-picker-input";
+import { IMAGES } from "@/content/site.config";
 
 // ── Types ─────────────────────────────────────────────────
 type BookingType = "wedding" | "event" | "studio" | null;
@@ -152,7 +153,8 @@ const MAIN_PACKAGES = [
         title: "Wedding Photography",
         subtitle: "From ₦843,750",
         desc: "Full wedding coverage with optional videography. Multiple packages available.",
-        image: "https://images.prismic.io/coffeeshotit/aFS4vnfc4bHWijt6_Coffee.jpg?auto=format,compress",
+        image: IMAGES.bookingCards.wedding.url,
+        alt: IMAGES.bookingCards.wedding.alt,
     },
     {
         type: "event" as BookingType,
@@ -160,7 +162,8 @@ const MAIN_PACKAGES = [
         title: "Event Photography",
         subtitle: "From ₦356,250",
         desc: "CoffeeShoot events or full day coverage with photo & video options.",
-        image: "https://images.prismic.io/coffeeshotit/aFWAGnfc4bHWilBg_5I5A0292-2.jpg?auto=format,compress",
+        image: IMAGES.bookingCards.event.url,
+        alt: IMAGES.bookingCards.event.alt,
     },
     {
         type: "studio" as BookingType,
@@ -168,7 +171,8 @@ const MAIN_PACKAGES = [
         title: "Studio & Outdoor",
         subtitle: "From ₦100,000",
         desc: "Studio portraits or outdoor sessions with optional content creation add-ons.",
-        image: "https://images.prismic.io/coffeeshotit/aFS4vnfc4bHWijt6_Coffee.jpg?auto=format,compress",
+        image: IMAGES.bookingCards.studio.url,
+        alt: IMAGES.bookingCards.studio.alt,
     },
 ];
 
@@ -349,7 +353,7 @@ export default function BookingPage() {
                                 </p>
 
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-                                    {MAIN_PACKAGES.map(({ type, icon: Icon, title, subtitle, desc, image }) => (
+                                    {MAIN_PACKAGES.map(({ type, icon: Icon, title, subtitle, desc, image, alt }) => (
                                         <motion.button
                                             key={type}
                                             onClick={() => { setBookingType(type); setStep("form"); }}
@@ -357,7 +361,7 @@ export default function BookingPage() {
                                             whileTap={{ scale: 0.98 }}
                                             className="group relative text-left overflow-hidden rounded-2xl h-[480px]"
                                         >
-                                            <Image src={image} alt={title} fill className="object-cover transition-transform duration-700 group-hover:scale-105" sizes="(max-width: 768px) 100vw, 33vw" />
+                                            <Image src={image} alt={alt ?? title} fill className="object-cover transition-transform duration-700 group-hover:scale-105" sizes="(max-width: 768px) 100vw, 33vw" />
                                             <div className="absolute inset-0 bg-black/50 group-hover:bg-black/40 transition-colors duration-500" />
                                             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
                                             <div className="absolute top-5 left-5 w-9 h-9 rounded-xl bg-black/40 backdrop-blur-sm border border-white/10 flex items-center justify-center">
@@ -399,7 +403,7 @@ export default function BookingPage() {
                         {/* Left sticky panel */}
                         <div className="relative hidden lg:block">
                             <div className="sticky top-0 h-screen overflow-hidden">
-                                <Image src={mainPkg?.image ?? ""} alt={mainPkg?.title ?? ""} fill className="object-cover" sizes="40vw" />
+                                <Image src={mainPkg?.image ?? ""} alt={mainPkg?.alt ?? mainPkg?.title ?? ""} fill className="object-cover" sizes="40vw" />
                                 <div className="absolute inset-0 bg-black/65" />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
                                 <div className="absolute inset-0 flex flex-col justify-between p-10">

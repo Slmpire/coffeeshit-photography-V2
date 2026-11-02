@@ -6,6 +6,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, Instagram, Twitter, Youtube } from "lucide-react";
 
+const CTA_IMAGE =
+    "https://res.cloudinary.com/wuruxed3/image/upload/f_auto,q_auto,c_limit,w_1400/v1793017822/_J6to0wx10keiQXZ_5I5A0138.jpg";
+
 const SOCIALS = [
     { icon: Instagram, label: "Instagram", href: "https://instagram.com/coffeeshotit" },
     { icon: Twitter, label: "Twitter", href: "https://twitter.com/coffeeshotit" },
@@ -104,8 +107,8 @@ export default function ContactCTA() {
                             className="flex items-center gap-6 pt-4 border-t border-white/5"
                         >
                             {SOCIALS.map(({ icon: Icon, label, href }) => (
-                                
-                                  <a key={label}
+                                <a
+                                    key={label}
                                     href={href}
                                     target="_blank"
                                     rel="noopener noreferrer"
@@ -127,11 +130,12 @@ export default function ContactCTA() {
                     >
                         <div className="relative h-[500px] md:h-[620px] rounded-2xl overflow-hidden">
                             <Image
-                                src="https://images.prismic.io/coffeeshotit/aFS4vnfc4bHWijt6_Coffee.jpg?auto=format,compress"
+                                src={CTA_IMAGE}
                                 alt="Coffee — Professional Photographer"
                                 fill
                                 className="object-cover"
                                 sizes="(max-width: 1024px) 100vw, 50vw"
+                                loading="lazy"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                         </div>

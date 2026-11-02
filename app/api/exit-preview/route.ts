@@ -1,5 +1,6 @@
-import { exitPreview } from "@prismicio/next";
+import { NextResponse } from "next/server";
 
+// Prismic exit-preview removed — site uses static content from site.config.ts
 export function GET() {
-  return exitPreview();
+    return NextResponse.redirect("/");
 }

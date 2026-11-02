@@ -1,30 +1,20 @@
 import type { Metadata } from "next";
-import { createClient } from "@/prismicio";
-import { FaqDocument } from "@/prismicio-types";
+import { FAQ } from "@/content/site.config";
 import FAQClient from "./faq-client";
 import Link from "next/link";
+import { IMAGES } from "@/content/site.config";
 
 export const metadata: Metadata = {
-    title: "About",
-    description: "Learn about Coffee — professional photographer and creative director based in Lagos, Nigeria.",
+    title: "FAQ — CoffeeShotIt",
+    description: "Frequently asked questions about booking Coffee for your wedding, event, or portrait session in Lagos, Nigeria.",
     openGraph: {
-        title: "About Coffee | CoffeeShotIt",
-        description: "The person behind the lens — professional photographer based in Lagos, Nigeria.",
-        images: ["https://images.prismic.io/coffeeshotit/aFS4vnfc4bHWijt6_Coffee.jpg?auto=format,compress"],
+        title: "FAQ | CoffeeShotIt",
+        description: "Everything you need to know before booking Coffee — professional photographer based in Lagos, Nigeria.",
+        images: [IMAGES.aboutHero.url],
     },
 };
 
-export const revalidate = 60;
-
-export default async function FAQPage() {
-    const client = createClient();
-    let faq: FaqDocument[] = [];
-    try {
-        faq = await client.getAllByType("faq") as unknown as FaqDocument[];
-    } catch (e) {
-        faq = [];
-    }
-
+export default function FAQPage() {
     return (
         <main className="w-full bg-black text-white min-h-screen">
 
@@ -45,7 +35,7 @@ export default async function FAQPage() {
                         </h1>
                         <p className="text-white/40 text-base font-light leading-relaxed max-w-sm md:ml-auto">
                             Everything you need to know before booking.
-                            Can't find your answer?{" "}
+                            Can&apos;t find your answer?{" "}
                             <Link href="/contact" className="text-amber-400 hover:text-amber-300 transition-colors underline underline-offset-2">
                                 Just ask.
                             </Link>
@@ -55,7 +45,7 @@ export default async function FAQPage() {
             </section>
 
             {/* FAQ list */}
-            <FAQClient faq={faq} />
+            <FAQClient faq={FAQ} />
 
             {/* CTA */}
             <section className="border-t border-white/5 py-20">
@@ -69,8 +59,7 @@ export default async function FAQPage() {
                                 Contact Coffee
                             </button>
                         </Link>
-                        
-                            <a href="https://wa.me/2348116273856"
+                        <a href="https://wa.me/2348116273856"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="px-8 py-3.5 border border-white/20 hover:border-white/50 text-white text-xs uppercase tracking-[0.2em] rounded-full transition-all duration-300"

@@ -15,9 +15,9 @@ export const metadata: Metadata = {
     },
 };
 
-export const revalidate = 60;
+export const revalidate = 3600;
 
-export default async function HomePage() {
+export default function HomePage() {
     const featuredProjects = PROJECTS.filter((p) =>
         FEATURED_PROJECT_UIDS.includes(p.uid)
     );

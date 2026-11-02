@@ -1,21 +1,39 @@
-import { createClient } from "@/prismicio";
-import { getSingleGalleryQuery } from "@/lib/query/gallery.query";
-import React from "react";
-import MainPage from "./(components)/main-page";
-import { GalleryTypesDocument } from "@/prismicio-types";
+import { notFound } from "next/navigation";
+import { IMAGES } from "@/content/site.config";
+import type { Metadata } from "next";
+import GalleryMainPage from "./(components)/main-page";
 
-export const dynamic = "force-dynamic";
+export async function generateStaticParams() {
+    return IMAGES.portfolioCategories.map((cat) => ({ slug: cat.uid }));
+}
 
-const page = async ({ params }: { params: Promise<{ slug: string }> }) => {
+export async function generateMetadata({
+    params,
+}: {
+    params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
     const { slug } = await params;
-    const client = createClient();
-    const galleryType = await getSingleGalleryQuery(client, slug);
+    const cat = IMAGES.portfolioCategories.find((c) => c.uid === slug);
+    if (!cat) return {};
+    return {
+        title: `${cat.label} — CoffeeShotIt`,
+        description: cat.description,
+        openGraph: {
+            title: `${cat.label} | CoffeeShotIt`,
+            description: cat.description,
+            images: [cat.url],
+        },
+    };
+}
 
-    return (
-        <MainPage
-            galleryType={galleryType as unknown as GalleryTypesDocument}
-        />
-    );
-};
+export default async function GallerySlugPage({
+    params,
+}: {
+    params: Promise<{ slug: string }>;
+}) {
+    const { slug } = await params;
+    const cat = IMAGES.portfolioCategories.find((c) => c.uid === slug);
+    if (!cat) notFound();
 
-export default page;
+    return <GalleryMainPage category={cat} />;
+}

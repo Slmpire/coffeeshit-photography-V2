@@ -3,36 +3,17 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Minus } from "lucide-react";
-import { FaqDocument } from "@/prismicio-types";
 
-const FALLBACK_FAQS = [
-    { question: "How far in advance should I book?", answer: "For weddings, at least 3–6 months in advance. For events and portrait sessions, 2–4 weeks is usually sufficient. The earlier the better to secure your preferred date." },
-    { question: "How long does it take to receive my photos?", answer: "Wedding galleries are delivered within 4–6 weeks. Event photos within 2–3 weeks. Portrait sessions within 1–2 weeks. Rush delivery is available on request." },
-    { question: "Does Coffee travel outside Lagos?", answer: "Yes. Coffee is available anywhere in Nigeria and internationally. Travel costs are added to the package price and confirmed during consultation." },
-    { question: "What happens if it rains on my wedding day?", answer: "Rain doesn't stop the shoot. Coffee has experience shooting in all weather conditions and often creates the most dramatic and beautiful images on rainy days. If you prefer to reschedule, we can discuss options." },
-    { question: "How does the deposit work?", answer: "A 50% deposit is required to secure your date. The remaining balance is due 7 days before your session. Deposits are non-refundable but transferable to another date with 30 days notice." },
-    { question: "What is the cancellation policy?", answer: "Cancellations made 30+ days before the event can transfer the deposit to a new date. Cancellations within 30 days forfeit the deposit. Full payment is non-refundable within 7 days of the event." },
-    { question: "What format are photos delivered in?", answer: "All photos are delivered as high-resolution JPEGs via a private Pixieset gallery. You can download full-resolution files and order prints directly from the gallery." },
-    { question: "Are raw or unedited files available?", answer: "No. Raw files are not delivered. The editing process is an essential part of the final product and reflects Coffee's signature style." },
-    { question: "How should I prepare for a portrait session?", answer: "Wear outfits that make you feel confident and comfortable. Avoid very busy patterns. Coffee will share a prep guide after booking with detailed tips on what to bring and how to prepare." },
-    { question: "Is a second shooter available?", answer: "Yes, a second shooter can be added to wedding packages. This ensures full coverage of different moments happening simultaneously. Ask about pricing during consultation." },
-];
+type FAQItem = { question: string; answer: string };
 
-export default function FAQClient({ faq }: { faq: FaqDocument[] }) {
+export default function FAQClient({ faq }: { faq: FAQItem[] }) {
     const [open, setOpen] = useState<number | null>(0);
-
-    const items = faq?.length > 0
-        ? faq.map((f) => ({
-            question: f.data.question as string,
-            answer: f.data.answer as string,
-        }))
-        : FALLBACK_FAQS;
 
     return (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
             <div className="max-w-3xl">
                 <div className="divide-y divide-white/5">
-                    {items.map((item, idx) => (
+                    {faq.map((item, idx) => (
                         <div key={idx}>
                             <button
                                 onClick={() => setOpen(open === idx ? null : idx)}

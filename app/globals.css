@@ -145,3 +145,32 @@ select option {
 select {
     color-scheme: dark;
 }
+/* Image loading shimmer */
+.shimmer {
+    background: linear-gradient(
+        110deg,
+        rgba(255, 255, 255, 0.03) 8%,
+        rgba(255, 255, 255, 0.09) 18%,
+        rgba(255, 255, 255, 0.03) 33%
+    );
+    background-size: 200% 100%;
+    animation: shimmer-move 1.4s linear infinite;
+}
+
+@keyframes shimmer-move {
+    to {
+        background-position-x: -200%;
+    }
+}
+
+@media (prefers-color-scheme: light) {
+    .shimmer {
+        background: linear-gradient(
+            110deg,
+            rgba(0, 0, 0, 0.04) 8%,
+            rgba(0, 0, 0, 0.1) 18%,
+            rgba(0, 0, 0, 0.04) 33%
+        );
+        background-size: 200% 100%;
+    }
+}

@@ -10,6 +10,8 @@ import WhatsAppButton from "@/components/whatsapp-button";
 import MobileStickyBar from "@/components/mobile-sticky-bar";
 import ChatWidget from "@/components/chat-widget";
 import IntroAnimation from "@/components/intro-animation";
+// 1. With the other imports at the top
+import RouteProgress from "@/components/route-progress";
 const dancingScript = Dancing_Script({
     subsets: ["latin"],
     weight: ["400", "500", "600", "700"],
@@ -103,6 +105,7 @@ export default function RootLayout({
                 className={`${raleway.variable} ${dancingScript.variable} font-[family-name:var(--font-raleway)] bg-black text-white overflow-x-hidden antialiased`}
             >
                 <Provider>
+                    <RouteProgress />
                     <IntroAnimation />
                     <Header />
                     <main className="min-h-screen">

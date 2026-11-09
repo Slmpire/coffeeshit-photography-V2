@@ -804,7 +804,7 @@ export const PROJECTS = [
     },
     {
         uid: "ruka-wedding",
-        title: "Ruka's Wedding",
+        title: "Rofiyat and Ibrahim",
         category: "wedding",
         client: "Ruka", // TODO: couple's full names
         location: "Lagos, Nigeria", // TODO: real venue
@@ -816,7 +816,7 @@ export const PROJECTS = [
     },
     {
         uid: "opeyemi-wedding",
-        title: "Opeyemi's Wedding",
+        title: "Dolapo and Opeyemi",
         category: "wedding",
         client: "Opeyemi", // TODO: couple's full names
         location: "Lagos, Nigeria", // TODO: real venue
@@ -828,13 +828,13 @@ export const PROJECTS = [
     },
     {
         uid: "cubana-event",
-        title: "Cubana Event",
+        title: "Obi Cubana's Birthday",
         category: "event",
         client: "Cubana",
         location: "Lagos, Nigeria", // TODO: real venue
         date: "2026-09-15", // TODO: real date
         description:
-            "Energy, laughter and star power. Coverage of the AY Show at the Cubana event — from the stage to the crowd, every standout moment captured.",
+            "Energy, laughter and star power. Coverage of the AY Show at the Cubana's event — from the stage to the crowd, every standout moment captured.",
         coverImage: pic(EVENTS[0], "Cubana Event — AY Show", 1800),
         gallery: pics(EVENTS, "Cubana Event — AY Show"),
     },

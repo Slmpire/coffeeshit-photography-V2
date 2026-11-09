@@ -299,10 +299,6 @@ const CHARLES = uniq([
     "v1793619253/PjlWWW90U15DYxYY_5I5A0020.jpg",
     "v1793619263/rMr4R42aYzjdh_4H_5I5A9803.jpg",
     "v1793619272/EmwtwdiC6nsqjlEs_5I5A9830.jpg",
-]);
-
-// "Htt" — label from the notes; rename the title in PROJECTS when you know it
-const HTT = uniq([
     "v1793619294/g9uPDEGCicvtCWc7_5I5A9915.jpg",
     "v1793619306/qwY4dka5lM4AmCdE_5I5A9925.jpg",
     "v1793619317/CJEWR0tuSu0wVA-o_5I5A9929.jpg",
@@ -545,7 +541,7 @@ export const IMAGES = {
             label: "Weddings",
             description:
                 "Full-day wedding coverage from getting ready to the last dance.",
-            ...pic(RUKA_WEDDING[0], "Wedding Photography", 1200),
+            ...pic(WEDDING[5], "Wedding Photography", 1200),
             gallery: pics(
                 [...RUKA_WEDDING, ...OPEYEMI_WEDDING, ...WEDDING],
                 "Wedding photography"
@@ -565,7 +561,7 @@ export const IMAGES = {
             description:
                 "Concerts, shows, birthdays, burials and corporate events — every celebration deserves to be remembered.",
             ...pic(EVENTS[0], "Event Photography", 1200),
-            gallery: pics([...FOUNTAIN_GROUP, ...EVENTS], "Event photography"),
+            gallery: pics([ ...EVENTS], "Event photography"),
         },
         {
             uid: "portrait",
@@ -832,7 +828,7 @@ export const PROJECTS = [
     },
     {
         uid: "cubana-event",
-        title: "Cubana Event — AY Show",
+        title: "Cubana Event",
         category: "event",
         client: "Cubana",
         location: "Lagos, Nigeria", // TODO: real venue
@@ -879,18 +875,6 @@ export const PROJECTS = [
         gallery: pics(CHARLES, "Charles Born"),
     },
     {
-        uid: "htt-shoot",
-        title: "Htt", // TODO: full title
-        category: "portrait",
-        client: "Htt", // TODO
-        location: "Lagos, Nigeria", // TODO
-        date: "2026-08-18", // TODO
-        description:
-            "A polished portrait session focused on mood, expression and timeless frames.",
-        coverImage: pic(HTT[0], "Htt", 1400),
-        gallery: pics(HTT, "Htt"),
-    },
-    {
         uid: "graduation-sessions",
         title: "Graduation Sessions",
         category: "graduation",
@@ -899,7 +883,7 @@ export const PROJECTS = [
         date: "2026-08-10", // TODO
         description:
             "Cap, gown and the proud moment — graduation portraits full of joy and achievement.",
-        coverImage: pic(GRADUATION[0], "Graduation Sessions", 1400),
+        coverImage: pic(GRADUATION[2], "Graduation Sessions", 1400),
         gallery: pics(GRADUATION, "Graduation Sessions"),
     },
     {

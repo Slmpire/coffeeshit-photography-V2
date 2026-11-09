@@ -8,10 +8,10 @@ import { ArrowUpRight } from "lucide-react";
 import { type PortfolioCategory } from "@/types/content";
 
 const STATS = [
-    { number: "500+", label: "Sessions Shot" },
-    { number: "200+", label: "Happy Clients" },
-    { number: "5+", label: "Years Active" },
-    { number: "10+", label: "Cities Covered" },
+    { number: "1000+", label: "Sessions Shot" },
+    { number: "500+", label: "Happy Clients" },
+    { number: "10+", label: "Years Active" },
+    { number: "15+", label: "Cities Covered" },
 ];
 
 interface AboutProps {

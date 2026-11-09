@@ -14,9 +14,9 @@ export const metadata: Metadata = {
 };
 
 const STATS = [
-    { number: "100+", label: "Projects Done" },
-    { number: "6+", label: "Years Experience" },
-    { number: "200+", label: "Happy Clients" },
+    { number: "500+", label: "Projects Done" },
+    { number: "10+", label: "Years Experience" },
+    { number: "500+", label: "Happy Clients" },
     { number: "99%", label: "Satisfaction Rate" },
 ];
 

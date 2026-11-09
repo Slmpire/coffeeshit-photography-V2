@@ -6,8 +6,8 @@ import Image from "next/image";
 import { IMAGES } from "@/content/site.config";
 
 const STATS = [
-    { number: "100+", label: "Projects Done" },
-    { number: "6+",   label: "Years Experience" },
+    { number: "500+", label: "Projects Done" },
+    { number: "8+",   label: "Years Experience" },
     { number: "5+",   label: "Recognitions" },
     { number: "99%",  label: "Happy Clients" },
 ];

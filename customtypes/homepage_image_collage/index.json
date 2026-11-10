@@ -1,0 +1,35 @@
+{
+  "format": "custom",
+  "id": "homepage_image_collage",
+  "label": "Homepage Image Collage",
+  "repeatable": false,
+  "status": true,
+  "json": {
+    "Main": {
+      "left": {
+        "type": "Image",
+        "config": {
+          "label": "left",
+          "constraint": {},
+          "thumbnails": []
+        }
+      },
+      "center": {
+        "type": "Image",
+        "config": {
+          "label": "center",
+          "constraint": {},
+          "thumbnails": []
+        }
+      },
+      "right": {
+        "type": "Image",
+        "config": {
+          "label": "right",
+          "constraint": {},
+          "thumbnails": []
+        }
+      }
+    }
+  }
+}

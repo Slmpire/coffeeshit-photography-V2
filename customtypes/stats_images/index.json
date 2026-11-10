@@ -1,0 +1,36 @@
+{
+  "format": "custom",
+  "id": "stats_images",
+  "label": "Stats images",
+  "repeatable": false,
+  "status": true,
+  "json": {
+    "Main": {
+      "group_one": {
+        "type": "Group",
+        "config": {
+          "label": "group one",
+          "repeat": true,
+          "fields": {
+            "images": {
+              "type": "Image",
+              "config": {
+                "label": "images",
+                "constraint": {},
+                "thumbnails": []
+              }
+            }
+          }
+        }
+      },
+      "feature_image": {
+        "type": "Image",
+        "config": {
+          "label": "Feature Image",
+          "constraint": {},
+          "thumbnails": []
+        }
+      }
+    }
+  }
+}

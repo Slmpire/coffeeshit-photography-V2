@@ -1,0 +1,176 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --background: 0 0% 0%;
+        --foreground: 0 0% 98%;
+        --card: 0 0% 4%;
+        --card-foreground: 0 0% 98%;
+        --popover: 0 0% 4%;
+        --popover-foreground: 0 0% 98%;
+        --primary: 38 92% 50%;
+        --primary-foreground: 0 0% 0%;
+        --secondary: 0 0% 10%;
+        --secondary-foreground: 0 0% 98%;
+        --muted: 0 0% 15%;
+        --muted-foreground: 0 0% 64%;
+        --accent: 38 92% 50%;
+        --accent-foreground: 0 0% 0%;
+        --destructive: 0 84% 60%;
+        --destructive-foreground: 0 0% 98%;
+        --border: 0 0% 15%;
+        --input: 0 0% 15%;
+        --ring: 38 92% 50%;
+        --radius: 0.5rem;
+    }
+
+    * {
+        @apply border-border;
+    }
+
+    body {
+        @apply bg-background text-foreground;
+    }
+
+    html {
+        scroll-behavior: smooth;
+        scroll-padding-top: 5rem;
+    }
+
+    ::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.1);
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: rgba(245, 158, 11, 0.5);
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: rgba(245, 158, 11, 0.8);
+    }
+
+    * {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(245, 158, 11, 0.5) rgba(0, 0, 0, 0.1);
+    }
+}
+
+@layer components {
+    .text-gradient {
+        @apply bg-gradient-to-r from-white via-amber-200 to-amber-400 bg-clip-text text-transparent;
+    }
+
+    .glass-effect {
+        @apply bg-white/5 backdrop-blur-md border border-white/10;
+    }
+
+    .hover-glow:hover {
+        box-shadow: 0 0 30px rgba(245, 158, 11, 0.15);
+    }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+@keyframes glow {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.animate-float {
+    animation: float 3s ease-in-out infinite;
+}
+
+.animate-glow {
+    animation: glow 2s ease-in-out infinite;
+}
+
+.signature-font {
+    font-family: var(--font-dancing-script), cursive;
+    font-weight: 700;
+}
+
+.cinematic-blur {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+
+.premium-shadow {
+    box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.05),
+        0 4px 6px rgba(0, 0, 0, 0.3),
+        0 16px 32px rgba(0, 0, 0, 0.4);
+}
+
+@media (max-width: 1023px) {
+    .signature-font {
+        font-size: clamp(2rem, 8vw, 4rem);
+    }
+}
+/* Fix date/time picker icons on dark backgrounds */
+
+input[type="date"],
+input[type="time"] {
+    color-scheme: dark;
+    color: white;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: brightness(0) invert(1);
+    cursor: pointer;
+    opacity: 0.6;
+}
+
+/* Native select dropdown fix */
+select option {
+    background-color: #0a0a0a;
+    color: white;
+}
+
+select {
+    color-scheme: dark;
+}
+/* Image loading shimmer */
+.shimmer {
+    background: linear-gradient(
+        110deg,
+        rgba(255, 255, 255, 0.03) 8%,
+        rgba(255, 255, 255, 0.09) 18%,
+        rgba(255, 255, 255, 0.03) 33%
+    );
+    background-size: 200% 100%;
+    animation: shimmer-move 1.4s linear infinite;
+}
+
+@keyframes shimmer-move {
+    to {
+        background-position-x: -200%;
+    }
+}
+
+@media (prefers-color-scheme: light) {
+    .shimmer {
+        background: linear-gradient(
+            110deg,
+            rgba(0, 0, 0, 0.04) 8%,
+            rgba(0, 0, 0, 0.1) 18%,
+            rgba(0, 0, 0, 0.04) 33%
+        );
+        background-size: 200% 100%;
+    }
+}

@@ -1,0 +1,28 @@
+{
+  "format": "custom",
+  "id": "story_teller",
+  "label": "Story Teller",
+  "repeatable": false,
+  "status": true,
+  "json": {
+    "Main": {
+      "images": {
+        "type": "Group",
+        "config": {
+          "label": "images",
+          "repeat": true,
+          "fields": {
+            "image": {
+              "type": "Image",
+              "config": {
+                "label": "image",
+                "constraint": {},
+                "thumbnails": []
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

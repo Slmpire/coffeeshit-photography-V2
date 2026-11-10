@@ -1,0 +1,28 @@
+{
+  "format": "custom",
+  "id": "slider",
+  "label": "Slider",
+  "repeatable": false,
+  "status": true,
+  "json": {
+    "Main": {
+      "sliders": {
+        "type": "Group",
+        "config": {
+          "label": "sliders",
+          "repeat": true,
+          "fields": {
+            "image": {
+              "type": "Image",
+              "config": {
+                "label": "image",
+                "constraint": {},
+                "thumbnails": []
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

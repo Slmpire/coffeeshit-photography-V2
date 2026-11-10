@@ -1,0 +1,29 @@
+{
+  "format": "custom",
+  "id": "featured_projects",
+  "label": "Featured Projects",
+  "repeatable": false,
+  "status": true,
+  "json": {
+    "Main": {
+      "featured_projects": {
+        "type": "Group",
+        "config": {
+          "label": "Featured Projects",
+          "repeat": true,
+          "fields": {
+            "project": {
+              "type": "Link",
+              "config": {
+                "label": "Project",
+                "select": "document",
+                "repeat": false,
+                "customtypes": ["projects"]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
